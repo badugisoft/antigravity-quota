@@ -66,8 +66,9 @@
 - **Live Countdown Clocks**:
   - 1-second interval live countdown clocks showing exact time until the next quota replenishment (e.g., `4h 52m left`, `1d 20h left`).
 - **Adaptive Smart Polling**:
-  - **15-Second Active Polling**: When Antigravity (`com.google.antigravity`) is in focus, refresh frequency accelerates to 15s to capture quota changes in real-time as you code.
-  - **60-Second Idle Polling**: When working in other apps, interval steps down to 60s to conserve battery and CPU.
+  - **15-Second AI Burst Polling**: When AI activity (token generation, tool calling) causes quota to decrease, polling automatically accelerates to 15s for 3 minutes to provide real-time updates while you work (even if Antigravity is in the background).
+  - **60-Second Idle Polling**: When no AI quota consumption occurs, polling automatically steps down to 60s to conserve battery and CPU.
+  - **Instant Focus Refresh**: Switching to the Antigravity window triggers an immediate sync to catch new changes on demand.
   - **Automatic Pause**: Polling gracefully pauses when Antigravity is quit or offline (`⏸️`), resuming instantly when re-launched.
 - **Compact & Standard View Modes**:
   - **Standard Mode**: Detailed cards with visual progress gradients, percentages, and scheduled reset times.

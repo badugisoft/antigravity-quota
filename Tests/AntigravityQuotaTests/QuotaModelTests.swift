@@ -161,7 +161,49 @@ final class QuotaModelTests: XCTestCase {
     }
     
     @MainActor
+    func testQuotaBurstPollingActivationAndExpiry() async {
+        let b1 = QuotaBucket(bucketId: "5h", displayName: "5h", window: "5h", remainingFraction: 0.80, resetTime: "2026-09-13T12:00:00Z")
+        let g1 = QuotaGroup(displayName: "Gemini Models", description: "Models: Flash, Pro", buckets: [b1])
+        
+        final class BurstMockService: QuotaServiceProtocol {
+            var currentGroups: [QuotaGroup]
+            init(groups: [QuotaGroup]) { self.currentGroups = groups }
+            func fetchQuotaSummary() async throws -> QuotaResponseData {
+                return QuotaResponseData(groups: currentGroups)
+            }
+        }
+        
+        let mockService = BurstMockService(groups: [g1])
+        let vm = QuotaViewModel(service: mockService)
+        
+        // Initial state: ensure idle
+        vm.deactivateBurstMode()
+        XCTAssertFalse(vm.isAntigravityActive)
+        
+        // Same quota -> burst remains inactive
+        await vm.refresh()
+        XCTAssertFalse(vm.isAntigravityActive)
+        
+        // Quota decreases (AI consumed quota) -> burst activates
+        let bDecreased = QuotaBucket(bucketId: "5h", displayName: "5h", window: "5h", remainingFraction: 0.78, resetTime: "2026-09-13T12:00:00Z")
+        mockService.currentGroups = [QuotaGroup(displayName: "Gemini Models", description: "Models: Flash, Pro", buckets: [bDecreased])]
+        
+        await vm.refresh()
+        XCTAssertTrue(vm.isAntigravityActive)
+        XCTAssertNotNil(vm.lastAIActivityDate)
+        
+        // Deactivate burst mode
+        vm.deactivateBurstMode()
+        XCTAssertFalse(vm.isAntigravityActive)
+    }
+    
+    @MainActor
     func testGenerateScreenshots() throws {
+        guard ProcessInfo.processInfo.environment["GENERATE_SCREENSHOTS"] == "1" else {
+            print(">>> Skipping screenshot regeneration (set GENERATE_SCREENSHOTS=1 to regenerate)")
+            return
+        }
+        
         let app = NSApplication.shared
         app.setActivationPolicy(.accessory)
         

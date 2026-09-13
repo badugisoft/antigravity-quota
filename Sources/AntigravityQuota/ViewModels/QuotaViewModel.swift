@@ -31,6 +31,10 @@ public final class QuotaViewModel: ObservableObject {
     private var countdownTimer: AnyCancellable?
     private var cancellables = Set<AnyCancellable>()
     
+    // AI Burst Activity tracking
+    public let burstDuration: TimeInterval = 180.0 // 3 minutes cooldown
+    public private(set) var lastAIActivityDate: Date?
+    
     private let antigravityBundleId = "com.google.antigravity"
     
     public init(
@@ -41,7 +45,6 @@ public final class QuotaViewModel: ObservableObject {
         self.localization = localization ?? LocalizationManager.shared
         self.isCompactMode = UserDefaults.standard.bool(forKey: "isCompactMode")
         
-        checkActiveApplication()
         setupWorkspaceMonitoring()
         setupLocalizationObserver()
         startTimers()
@@ -62,19 +65,15 @@ public final class QuotaViewModel: ObservableObject {
     private func setupWorkspaceMonitoring() {
         let center = NSWorkspace.shared.notificationCenter
         
-        // Detect application activation (window focus switch)
+        // When user switches to Antigravity, immediately trigger a refresh to catch new quota changes
         center.publisher(for: NSWorkspace.didActivateApplicationNotification)
             .receive(on: RunLoop.main)
             .sink { [weak self] notification in
                 guard let self = self else { return }
                 if let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication {
-                    let isActive = (app.bundleIdentifier == self.antigravityBundleId || app.localizedName == "Antigravity")
-                    if self.isAntigravityActive != isActive {
-                        self.isAntigravityActive = isActive
-                        self.restartRefreshTimer()
-                        if isActive {
-                            Task { await self.refresh() }
-                        }
+                    let isAntigravity = (app.bundleIdentifier == self.antigravityBundleId || app.localizedName == "Antigravity")
+                    if isAntigravity {
+                        Task { await self.refresh() }
                     }
                 }
             }
@@ -87,10 +86,9 @@ public final class QuotaViewModel: ObservableObject {
                 guard let self = self else { return }
                 if let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication {
                     if app.bundleIdentifier == self.antigravityBundleId || app.localizedName == "Antigravity" {
-                        self.isAntigravityActive = false
+                        self.deactivateBurstMode()
                         self.isServerOnline = false
                         self.updateMenuBarSummary()
-                        self.restartRefreshTimer()
                         
                         let snapshot = QuotaSnapshot(
                             timestamp: Date(),
@@ -124,29 +122,47 @@ public final class QuotaViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    private func checkActiveApplication() {
-        if let frontApp = NSWorkspace.shared.frontmostApplication {
-            isAntigravityActive = (frontApp.bundleIdentifier == antigravityBundleId || frontApp.localizedName == "Antigravity")
-        }
-    }
-    
     // MARK: - Timers & Adaptive Polling
     
     public func startTimers() {
-        // Update currentNow every second for live countdown clocks
+        // Update currentNow every second for live countdown clocks & check burst expiry
         countdownTimer = Timer.publish(every: 1.0, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] now in
-                self?.currentNow = now
+                guard let self = self else { return }
+                self.currentNow = now
+                
+                // Automatically step down to idle (60s) after burst duration expires with no new AI quota usage
+                if self.isAntigravityActive, let lastActivity = self.lastAIActivityDate {
+                    if now.timeIntervalSince(lastActivity) >= self.burstDuration {
+                        self.deactivateBurstMode()
+                    }
+                }
             }
         
         restartRefreshTimer()
     }
     
+    public func activateBurstMode() {
+        lastAIActivityDate = Date()
+        if !isAntigravityActive {
+            isAntigravityActive = true
+            restartRefreshTimer()
+        }
+    }
+    
+    public func deactivateBurstMode() {
+        lastAIActivityDate = nil
+        if isAntigravityActive {
+            isAntigravityActive = false
+            restartRefreshTimer()
+        }
+    }
+    
     private func restartRefreshTimer() {
         refreshTimer?.cancel()
         
-        // 15 seconds when working in Antigravity, 60 seconds when idle / running other apps
+        // 15 seconds during active AI work sessions, 60 seconds when idle
         let interval: TimeInterval = isAntigravityActive ? 15.0 : 60.0
         
         refreshTimer = Timer.publish(every: interval, on: .main, in: .common)
@@ -158,6 +174,20 @@ public final class QuotaViewModel: ObservableObject {
             }
     }
     
+    public func didQuotaDecrease(from oldGroups: [QuotaGroup], to newGroups: [QuotaGroup]) -> Bool {
+        guard !oldGroups.isEmpty, !newGroups.isEmpty else { return false }
+        for oldGroup in oldGroups {
+            guard let newGroup = newGroups.first(where: { $0.displayName == oldGroup.displayName }) else { continue }
+            for oldBucket in oldGroup.buckets {
+                guard let newBucket = newGroup.buckets.first(where: { $0.bucketId == oldBucket.bucketId }) else { continue }
+                if newBucket.remainingFraction < oldBucket.remainingFraction - 0.0001 {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+    
     public func refresh() async {
         guard !isLoading else { return }
         isLoading = true
@@ -165,6 +195,12 @@ public final class QuotaViewModel: ObservableObject {
         
         do {
             let data = try await service.fetchQuotaSummary()
+            
+            // If quota decreased, activate burst mode (15s polling)
+            if didQuotaDecrease(from: self.groups, to: data.groups) {
+                activateBurstMode()
+            }
+            
             self.groups = data.groups
             self.quotaDescription = data.description
             self.lastUpdated = Date()
