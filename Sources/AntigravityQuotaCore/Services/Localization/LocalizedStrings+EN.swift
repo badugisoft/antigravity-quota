@@ -69,6 +69,72 @@ extension LocalizedStringKey {
             return "Failed to parse data: \(details)"
         case .errorNetwork(let details):
             return "Network connection error: \(details)"
+            
+        case .settings:
+            return "Settings"
+        case .generalTab:
+            return "General"
+        case .notificationsTab:
+            return "Notifications"
+        case .launchAtLogin:
+            return "Launch at Login"
+        case .launchAtLoginDescription:
+            return "Automatically launch in the menu bar when your Mac starts up."
+        case .menuBarStyle:
+            return "Menu Bar Display"
+        case .menuBarIconAndText:
+            return "Icon & Quota Percentages"
+        case .menuBarIconOnly:
+            return "Icon Only"
+        case .menuBarGaugeSource:
+            return "Gauge Target Quota"
+        case .gaugeGemini5h:
+            return "Gemini (5-Hour)"
+        case .gaugeGeminiWeekly:
+            return "Gemini (Weekly)"
+        case .gaugeClaude5h:
+            return "Claude / GPT (5-Hour)"
+        case .gaugeClaudeWeekly:
+            return "Claude / GPT (Weekly)"
+        case .popoverStyle:
+            return "Popover Style"
+        case .standardMode:
+            return "Standard"
+        case .compactMode:
+            return "Compact"
+        case .language:
+            return "Language"
+            
+        case .enableNotifications:
+            return "Enable Quota Notifications"
+        case .notifyFiveHour:
+            return "5-Hour Quota Reset Alert"
+        case .notifyWeekly:
+            return "Weekly Quota Reset Alert"
+        case .timeSensitiveAlert:
+            return "Time-Sensitive Alert (Breaks through Focus)"
+        case .timeSensitiveDescription:
+            return "Deliver immediate notification banners even during Do Not Disturb or Focus modes."
+        case .sendTestNotification:
+            return "Send Test Notification"
+        case .notificationTitleRefilled:
+            return "✦ Antigravity Quota Refilled"
+        case .notificationBodyRefilled(let model, let window):
+            return "\(model) \(window) quota has been refilled to 100%. You can resume working!"
+        case .notificationTestBody:
+            return "Test notification received successfully. You will be alerted when quotas refill."
+        case .notificationPermissionDenied:
+            return "Please enable notifications for Antigravity Quota in macOS System Settings > Notifications."
+        case .notificationPermissionRequired:
+            return "Notification Permission Required"
+        case .notificationPermissionDescription:
+            return "To receive quota refill alerts, notifications must be enabled in macOS System Settings."
+        case .openSystemSettings:
+            return "Open macOS System Settings"
+        case .requestPermission:
+            return "Allow Notifications"
+        case .notificationPermissionGranted:
+            return "macOS notifications are enabled and active."
         }
     }
 }

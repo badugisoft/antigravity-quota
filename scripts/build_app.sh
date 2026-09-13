@@ -77,6 +77,8 @@ cat <<EOF > "$CONTENTS_DIR/Info.plist"
     <true/>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <key>NSUserNotificationAlertStyle</key>
+    <string>banner</string>
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
 </dict>
@@ -143,7 +145,7 @@ EOF
 fi
 
 echo "==> Code signing main app bundle..."
-codesign --force --sign - "$APP_DIR"
+codesign --force --sign - --entitlements "$ROOT_DIR/scripts/entitlements/app.entitlements" "$APP_DIR"
 
 echo "==> Done! App bundle created at: $APP_DIR"
 

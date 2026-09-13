@@ -125,4 +125,22 @@ public struct QuotaBucket: Codable, Identifiable {
             return LocalizedStringKey.countdownSeconds(seconds: secs).string(for: language)
         }
     }
+    
+    /// Returns true if this bucket had a resetTime that has now passed and the quota was not already 100%.
+    public func isRefilled(at now: Date = Date()) -> Bool {
+        guard let resetDate = parsedResetDate else { return false }
+        return now >= resetDate && remainingPercentage < 100
+    }
+    
+    /// Returns a copy of the bucket optimistically set to 100% capacity with resetTime cleared.
+    public func refilledCopy() -> QuotaBucket {
+        return QuotaBucket(
+            bucketId: bucketId,
+            displayName: displayName,
+            description: description,
+            window: window,
+            remainingFraction: 1.0,
+            resetTime: nil
+        )
+    }
 }

@@ -69,6 +69,10 @@ jobs:
 
             ### Key Features
             - **Real-Time Quota Tracking**: Monitors Gemini & Claude / GPT rolling 5-Hour and Weekly limits.
+            - **Native macOS Settings Window**: Configure Launch at Login, menu bar gauge source, display style, and language.
+            - **Antigravity Logo & Circular Gauge**: Vector Antigravity arch logo encircled by a circular quota progress ring.
+            - **Offline Quota Auto-Recovery**: Optimistically tracks reset times even when the IDE is closed.
+            - **Quota Refill Notifications**: Native macOS banner notifications when 5-hour or weekly buckets refill to 100%.
             - **macOS Desktop & Notification Center Widgets**: Native Small (1x1) and Medium (1x2) WidgetKit widgets with `.regularMaterial` frosted glass.
             - **Intelligent Quota-Driven Burst Polling**: Accelerates to 15s during active AI sessions (with a 3-minute cooldown) and steps down to 60s when idle.
             - **Multi-Language Support**: English, 한국어, 简体中文, 日本語, Deutsch, Français, and Español.

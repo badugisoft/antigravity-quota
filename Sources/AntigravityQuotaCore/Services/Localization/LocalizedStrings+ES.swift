@@ -69,6 +69,72 @@ extension LocalizedStringKey {
             return "Error al procesar datos: \(details)"
         case .errorNetwork(let details):
             return "Error de conexión de red: \(details)"
+            
+        case .settings:
+            return "Ajustes"
+        case .generalTab:
+            return "General"
+        case .notificationsTab:
+            return "Notificaciones"
+        case .launchAtLogin:
+            return "Abrir al iniciar sesión"
+        case .launchAtLoginDescription:
+            return "Abrir automáticamente en la barra de menús al encender el Mac."
+        case .menuBarStyle:
+            return "Aspecto en la barra de menús"
+        case .menuBarIconAndText:
+            return "Icono y porcentajes de cuota"
+        case .menuBarIconOnly:
+            return "Solo icono"
+        case .menuBarGaugeSource:
+            return "Objetivo del indicador circular"
+        case .gaugeGemini5h:
+            return "Gemini (5 horas)"
+        case .gaugeGeminiWeekly:
+            return "Gemini (Semanal)"
+        case .gaugeClaude5h:
+            return "Claude / GPT (5 horas)"
+        case .gaugeClaudeWeekly:
+            return "Claude / GPT (Semanal)"
+        case .popoverStyle:
+            return "Estilo del popover"
+        case .standardMode:
+            return "Estándar"
+        case .compactMode:
+            return "Compacto"
+        case .language:
+            return "Idioma"
+            
+        case .enableNotifications:
+            return "Activar notificaciones de recarga de cuota"
+        case .notifyFiveHour:
+            return "Alerta de reinicio de cuota de 5 horas"
+        case .notifyWeekly:
+            return "Alerta de reinicio de cuota semanal"
+        case .timeSensitiveAlert:
+            return "Notificación urgente (ignora los modos de concentración)"
+        case .timeSensitiveDescription:
+            return "Muestra notificaciones de banner de inmediato incluso en modo No molestar."
+        case .sendTestNotification:
+            return "Enviar notificación de prueba"
+        case .notificationTitleRefilled:
+            return "✦ Cuota de Antigravity recargada"
+        case .notificationBodyRefilled(let model, let window):
+            return "La cuota de \(window) para \(model) se ha recargado al 100%. ¡Ya puedes reanudar el trabajo!"
+        case .notificationTestBody:
+            return "Notificación de prueba recibida correctamente. Recibirás avisos al recargarse las cuotas."
+        case .notificationPermissionDenied:
+            return "Permite las notificaciones de Antigravity Quota en Ajustes del Sistema > Notificaciones."
+        case .notificationPermissionRequired:
+            return "Permiso de notificación requerido"
+        case .notificationPermissionDescription:
+            return "Para recibir alertas de recarga de cuota, debes permitir las notificaciones en Ajustes del Sistema de macOS."
+        case .openSystemSettings:
+            return "Abrir Ajustes del Sistema de macOS"
+        case .requestPermission:
+            return "Permitir notificaciones"
+        case .notificationPermissionGranted:
+            return "Las notificaciones del sistema macOS están activadas."
         }
     }
 }

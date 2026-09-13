@@ -15,18 +15,18 @@ public final class QuotaViewModel: ObservableObject {
     @Published public var currentNow: Date = Date()
     @Published public var isAntigravityActive: Bool = false
     
-    // Compact mode preference persisted in UserDefaults
-    @Published public var isCompactMode: Bool {
-        didSet {
-            UserDefaults.standard.set(isCompactMode, forKey: "isCompactMode")
-        }
-    }
+    // Compact mode preference synchronized with AppSettings
+    @Published public var isCompactMode: Bool
     
     // Menu bar summary title
-    @Published public var menuBarSummary: String = "✦ AGY ..."
+    @Published public var menuBarSummary: String = "..."
+    
+    // Lowest remaining fraction (0.0 - 1.0) for dynamic gauge icon
+    @Published public var lowestRemainingFraction: Double = 1.0
     
     private let service: QuotaServiceProtocol
     public let localization: LocalizationManager
+    public let settings: AppSettings
     private var refreshTimer: AnyCancellable?
     private var countdownTimer: AnyCancellable?
     private var cancellables = Set<AnyCancellable>()
@@ -39,14 +39,17 @@ public final class QuotaViewModel: ObservableObject {
     
     public init(
         service: QuotaServiceProtocol = QuotaService.shared,
-        localization: LocalizationManager? = nil
+        localization: LocalizationManager? = nil,
+        settings: AppSettings = .shared
     ) {
         self.service = service
         self.localization = localization ?? LocalizationManager.shared
-        self.isCompactMode = UserDefaults.standard.bool(forKey: "isCompactMode")
+        self.settings = settings
+        self.isCompactMode = settings.isCompactMode
         
         setupWorkspaceMonitoring()
         setupLocalizationObserver()
+        setupSettingsObservers()
         startTimers()
         
         Task {
@@ -122,15 +125,41 @@ public final class QuotaViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
+    private func setupSettingsObservers() {
+        settings.$showMenuBarText
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.updateMenuBarSummary()
+            }
+            .store(in: &cancellables)
+            
+        settings.$isCompactMode
+            .receive(on: RunLoop.main)
+            .sink { [weak self] isCompact in
+                self?.isCompactMode = isCompact
+            }
+            .store(in: &cancellables)
+            
+        settings.$menuBarGaugeSource
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.updateLowestRemainingFraction()
+            }
+            .store(in: &cancellables)
+    }
+    
     // MARK: - Timers & Adaptive Polling
     
     public func startTimers() {
-        // Update currentNow every second for live countdown clocks & check burst expiry
+        // Update currentNow every second for live countdown clocks, refill checks & burst expiry
         countdownTimer = Timer.publish(every: 1.0, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] now in
                 guard let self = self else { return }
                 self.currentNow = now
+                
+                // Check if any quota has passed its resetTime to optimistically recover and notify
+                self.checkAndApplyQuotaRefills(at: now)
                 
                 // Automatically step down to idle (60s) after burst duration expires with no new AI quota usage
                 if self.isAntigravityActive, let lastActivity = self.lastAIActivityDate {
@@ -205,6 +234,7 @@ public final class QuotaViewModel: ObservableObject {
             self.quotaDescription = data.description
             self.lastUpdated = Date()
             self.isServerOnline = true
+            updateLowestRemainingFraction()
             updateMenuBarSummary()
             
             let snapshot = QuotaSnapshot(
@@ -218,6 +248,7 @@ public final class QuotaViewModel: ObservableObject {
         } catch {
             self.errorMessage = error.localizedDescription
             self.isServerOnline = false
+            updateLowestRemainingFraction()
             updateMenuBarSummary()
             
             let snapshot = QuotaSnapshot(
@@ -231,6 +262,72 @@ public final class QuotaViewModel: ObservableObject {
         }
         
         isLoading = false
+    }
+    
+    // MARK: - Refill Detection & Gauge Calculation
+    
+    public func updateLowestRemainingFraction() {
+        let fraction: Double
+        switch settings.menuBarGaugeSource {
+        case .gemini5h:
+            fraction = geminiGroup?.fiveHourBucket?.remainingFraction ?? 1.0
+        case .geminiWeekly:
+            fraction = geminiGroup?.weeklyBucket?.remainingFraction ?? 1.0
+        case .claude5h:
+            fraction = claudeGptGroup?.fiveHourBucket?.remainingFraction ?? 1.0
+        case .claudeWeekly:
+            fraction = claudeGptGroup?.weeklyBucket?.remainingFraction ?? 1.0
+        }
+        self.lowestRemainingFraction = max(0.0, min(1.0, fraction))
+    }
+    
+    public func checkAndApplyQuotaRefills(at now: Date) {
+        var didChange = false
+        var updatedGroups = groups
+        
+        for gIndex in 0..<updatedGroups.count {
+            var updatedBuckets = updatedGroups[gIndex].buckets
+            for bIndex in 0..<updatedBuckets.count {
+                let bucket = updatedBuckets[bIndex]
+                if bucket.isRefilled(at: now) {
+                    // Send local notification
+                    let windowLabel = bucket.window ?? bucket.displayName
+                    let resetKey = "\(bucket.bucketId)_\(bucket.resetTime ?? "")"
+                    
+                    NotificationManager.shared.notifyQuotaRefilled(
+                        modelName: updatedGroups[gIndex].displayName,
+                        window: windowLabel,
+                        resetKey: resetKey,
+                        settings: settings,
+                        language: localization.currentLanguage
+                    )
+                    
+                    // Optimistically refill the bucket to 100% capacity
+                    updatedBuckets[bIndex] = bucket.refilledCopy()
+                    didChange = true
+                }
+            }
+            updatedGroups[gIndex] = QuotaGroup(
+                displayName: updatedGroups[gIndex].displayName,
+                description: updatedGroups[gIndex].description,
+                buckets: updatedBuckets
+            )
+        }
+        
+        if didChange {
+            self.groups = updatedGroups
+            updateLowestRemainingFraction()
+            updateMenuBarSummary()
+            
+            let snapshot = QuotaSnapshot(
+                timestamp: Date(),
+                isOnline: isServerOnline,
+                groups: updatedGroups,
+                description: quotaDescription,
+                languageCode: localization.currentLanguage.rawValue
+            )
+            QuotaDataStore.shared.save(snapshot: snapshot)
+        }
     }
     
     // MARK: - Helper Accessors
@@ -249,11 +346,15 @@ public final class QuotaViewModel: ObservableObject {
     // MARK: - Menu Bar Summary
     
     private func updateMenuBarSummary() {
+        guard settings.showMenuBarText else {
+            menuBarSummary = ""
+            return
+        }
+        
         if !isServerOnline {
             if groups.isEmpty {
                 menuBarSummary = localization.string(.menuBarWaiting)
             } else {
-                // Keep previous quota values but prepend pause icon
                 var parts: [String] = []
                 if let gGroup = geminiGroup, let bucket = gGroup.fiveHourBucket {
                     parts.append("G:\(bucket.remainingPercentage)%")
@@ -261,7 +362,7 @@ public final class QuotaViewModel: ObservableObject {
                 if let cGroup = claudeGptGroup, let bucket = cGroup.fiveHourBucket {
                     parts.append("C:\(bucket.remainingPercentage)%")
                 }
-                menuBarSummary = "⏸️ " + parts.joined(separator: " · ")
+                menuBarSummary = "⏸ " + parts.joined(separator: " · ")
             }
             return
         }
@@ -281,7 +382,7 @@ public final class QuotaViewModel: ObservableObject {
             if pct < 20 { isAnyLow = true }
         }
         
-        let prefix = isAnyLow ? "⚠️ " : "✦ "
+        let prefix = isAnyLow ? "⚠️ " : ""
         if parts.isEmpty {
             menuBarSummary = "\(prefix)AGY"
         } else {

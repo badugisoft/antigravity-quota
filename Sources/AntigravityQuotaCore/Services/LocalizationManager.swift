@@ -149,6 +149,42 @@ public enum LocalizedStringKey {
     case errorDecoding(details: String)
     case errorNetwork(details: String)
     
+    // Settings & Preferences
+    case settings
+    case generalTab
+    case notificationsTab
+    case launchAtLogin
+    case launchAtLoginDescription
+    case menuBarStyle
+    case menuBarIconAndText
+    case menuBarIconOnly
+    case menuBarGaugeSource
+    case gaugeGemini5h
+    case gaugeGeminiWeekly
+    case gaugeClaude5h
+    case gaugeClaudeWeekly
+    case popoverStyle
+    case standardMode
+    case compactMode
+    case language
+    
+    // Notifications Configuration & Delivery
+    case enableNotifications
+    case notifyFiveHour
+    case notifyWeekly
+    case timeSensitiveAlert
+    case timeSensitiveDescription
+    case sendTestNotification
+    case notificationTitleRefilled
+    case notificationBodyRefilled(model: String, window: String)
+    case notificationTestBody
+    case notificationPermissionDenied
+    case notificationPermissionRequired
+    case notificationPermissionDescription
+    case openSystemSettings
+    case requestPermission
+    case notificationPermissionGranted
+    
     public func string(for language: AppLanguage) -> String {
         switch language {
         case .en: return englishString

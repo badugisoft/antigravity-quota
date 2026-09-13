@@ -69,6 +69,72 @@ extension LocalizedStringKey {
             return "数据解析失败: \(details)"
         case .errorNetwork(let details):
             return "网络连接错误: \(details)"
+            
+        case .settings:
+            return "设置"
+        case .generalTab:
+            return "通用"
+        case .notificationsTab:
+            return "通知"
+        case .launchAtLogin:
+            return "开机自动启动"
+        case .launchAtLoginDescription:
+            return "Mac 启动时在菜单栏中自动运行。"
+        case .menuBarStyle:
+            return "菜单栏显示"
+        case .menuBarIconAndText:
+            return "图标与配额百分比"
+        case .menuBarIconOnly:
+            return "仅图标"
+        case .menuBarGaugeSource:
+            return "圆环刻度显示目标"
+        case .gaugeGemini5h:
+            return "Gemini（5小时）"
+        case .gaugeGeminiWeekly:
+            return "Gemini（每周）"
+        case .gaugeClaude5h:
+            return "Claude / GPT（5小时）"
+        case .gaugeClaudeWeekly:
+            return "Claude / GPT（每周）"
+        case .popoverStyle:
+            return "弹出窗口样式"
+        case .standardMode:
+            return "标准模式"
+        case .compactMode:
+            return "紧凑模式"
+        case .language:
+            return "语言"
+            
+        case .enableNotifications:
+            return "启用配额补充通知"
+        case .notifyFiveHour:
+            return "5小时配额重置提醒"
+        case .notifyWeekly:
+            return "每周配额重置提醒"
+        case .timeSensitiveAlert:
+            return "时间敏感通知（穿透专注模式）"
+        case .timeSensitiveDescription:
+            return "在勿扰模式或专注模式下也立即显示横幅通知。"
+        case .sendTestNotification:
+            return "发送测试通知"
+        case .notificationTitleRefilled:
+            return "✦ Antigravity 配额已重置"
+        case .notificationBodyRefilled(let model, let window):
+            return "\(model) 的 \(window) 配额已恢复至 100%。您可以继续使用！"
+        case .notificationTestBody:
+            return "测试通知接收成功。配额重置时您将收到提醒。"
+        case .notificationPermissionDenied:
+            return "请在 macOS [系统设置] > [通知] 中允许 Antigravity Quota 的通知。"
+        case .notificationPermissionRequired:
+            return "需要通知权限"
+        case .notificationPermissionDescription:
+            return "若要接收配额补充提醒，必须在 macOS 系统设置中启用通知。"
+        case .openSystemSettings:
+            return "打开 macOS 系统设置"
+        case .requestPermission:
+            return "允许通知权限"
+        case .notificationPermissionGranted:
+            return "macOS 系统通知已启用。"
         }
     }
 }

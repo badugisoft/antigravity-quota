@@ -94,6 +94,20 @@ public struct MenuBarPopoverView: View {
                 .buttonStyle(.plain)
                 .focusable(false)
                 .help(localization.string(viewModel.isCompactMode ? .tooltipSwitchToStandard : .tooltipSwitchToCompact))
+                
+                // Settings button
+                Button(action: {
+                    SettingsWindowController.shared.showSettings()
+                }) {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                        .padding(3)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .focusable(false)
+                .help(localization.string(.settings))
             }
             .padding(.horizontal, 2)
             

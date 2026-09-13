@@ -1,6 +1,8 @@
 import Cocoa
 import SwiftUI
 import Combine
+import UserNotifications
+import AntigravityQuotaCore
 
 /// NSApplicationDelegate configuring the NSStatusItem, popover lifecycle, and event monitoring.
 @MainActor
@@ -22,6 +24,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
     public func applicationDidFinishLaunching(_ notification: Notification) {
         viewModel = QuotaViewModel()
         
+        UNUserNotificationCenter.current().delegate = NotificationManager.shared
+        NotificationManager.shared.requestAuthorization()
+        
         setupPopover()
         setupStatusItem()
         bindViewModel()
@@ -40,7 +45,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
         if let button = statusItem.button {
-            button.title = "✦ AGY ..."
+            button.image = MenuBarIconRenderer.shared.renderIcon(remainingFraction: 1.0, isOnline: false)
+            button.imagePosition = .imageLeft
+            button.title = ""
             button.font = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .medium)
             button.target = self
             button.action = #selector(togglePopover(_:))
@@ -48,12 +55,31 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func bindViewModel() {
-        viewModel.$menuBarSummary
-            .receive(on: RunLoop.main)
-            .sink { [weak self] summary in
-                self?.statusItem.button?.title = summary
+        Publishers.CombineLatest3(
+            viewModel.$lowestRemainingFraction,
+            viewModel.$isServerOnline,
+            viewModel.$menuBarSummary
+        )
+        .receive(on: RunLoop.main)
+        .sink { [weak self] fraction, isOnline, summary in
+            guard let button = self?.statusItem.button else { return }
+            
+            // Dynamic gauge icon
+            button.image = MenuBarIconRenderer.shared.renderIcon(
+                remainingFraction: fraction,
+                isOnline: isOnline
+            )
+            
+            // Text visibility
+            if summary.isEmpty {
+                button.imagePosition = .imageOnly
+                button.title = ""
+            } else {
+                button.imagePosition = .imageLeft
+                button.title = " " + summary
             }
-            .store(in: &cancellables)
+        }
+        .store(in: &cancellables)
             
         viewModel.$isCompactMode
             .receive(on: RunLoop.main)
@@ -61,9 +87,15 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
                 guard let self = self else { return }
                 let targetSize = isCompact ? self.compactSize : self.standardSize
                 self.popover.contentSize = targetSize
-                self.configurePopoverWindowVibrancy()
+                if self.popover.isShown {
+                    self.configurePopoverWindowVibrancy()
+                }
             }
             .store(in: &cancellables)
+    }
+    
+    @objc public func openSettings(_ sender: AnyObject?) {
+        SettingsWindowController.shared.showSettings()
     }
     
     @objc private func togglePopover(_ sender: AnyObject?) {
@@ -98,7 +130,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
     
     /// Ensures popover window is key and its visual effect views are active to keep transparency consistent.
     private func configurePopoverWindowVibrancy() {
-        guard let window = popover.contentViewController?.view.window else { return }
+        guard popover.isShown, let window = popover.contentViewController?.view.window else { return }
         window.makeKeyAndOrderFront(nil)
         
         func activateVisualEffectViews(in view: NSView) {

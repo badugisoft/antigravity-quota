@@ -69,6 +69,72 @@ extension LocalizedStringKey {
             return "Échec de l'analyse des données: \(details)"
         case .errorNetwork(let details):
             return "Erreur de connexion réseau: \(details)"
+            
+        case .settings:
+            return "Paramètres"
+        case .generalTab:
+            return "Général"
+        case .notificationsTab:
+            return "Notifications"
+        case .launchAtLogin:
+            return "Lancer au démarrage"
+        case .launchAtLoginDescription:
+            return "Lancer automatiquement dans la barre des menus au démarrage du Mac."
+        case .menuBarStyle:
+            return "Affichage de la barre des menus"
+        case .menuBarIconAndText:
+            return "Icône et pourcentages de quota"
+        case .menuBarIconOnly:
+            return "Icône seule"
+        case .menuBarGaugeSource:
+            return "Cible de la jauge circulaire"
+        case .gaugeGemini5h:
+            return "Gemini (5 heures)"
+        case .gaugeGeminiWeekly:
+            return "Gemini (Hebdomadaire)"
+        case .gaugeClaude5h:
+            return "Claude / GPT (5 heures)"
+        case .gaugeClaudeWeekly:
+            return "Claude / GPT (Hebdomadaire)"
+        case .popoverStyle:
+            return "Style du popover"
+        case .standardMode:
+            return "Standard"
+        case .compactMode:
+            return "Compact"
+        case .language:
+            return "Langue"
+            
+        case .enableNotifications:
+            return "Activer les notifications de quota"
+        case .notifyFiveHour:
+            return "Alerte de réinitialisation du quota 5h"
+        case .notifyWeekly:
+            return "Alerte de réinitialisation du quota hebdomadaire"
+        case .timeSensitiveAlert:
+            return "Notification urgente (outrepasser le mode Concentration)"
+        case .timeSensitiveDescription:
+            return "Afficher immédiatement les bannières même en mode Ne pas déranger ou Concentration."
+        case .sendTestNotification:
+            return "Envoyer une notification test"
+        case .notificationTitleRefilled:
+            return "✦ Quota Antigravity rechargé"
+        case .notificationBodyRefilled(let model, let window):
+            return "Le quota \(window) pour \(model) a été rechargé à 100%. Vous pouvez reprendre votre travail !"
+        case .notificationTestBody:
+            return "Notification test reçue avec succès. Vous serez averti lors des réinitialisations de quota."
+        case .notificationPermissionDenied:
+            return "Veuillez autoriser les notifications pour Antigravity Quota dans Réglages Système > Notifications."
+        case .notificationPermissionRequired:
+            return "Autorisation de notification requise"
+        case .notificationPermissionDescription:
+            return "Pour recevoir les alertes de recharge de quota, les notifications doivent être activées dans les Réglages Système."
+        case .openSystemSettings:
+            return "Ouvrir les Réglages Système"
+        case .requestPermission:
+            return "Autoriser les notifications"
+        case .notificationPermissionGranted:
+            return "Les notifications système macOS sont activées."
         }
     }
 }

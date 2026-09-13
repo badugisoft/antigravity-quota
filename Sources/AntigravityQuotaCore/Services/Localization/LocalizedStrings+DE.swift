@@ -69,6 +69,72 @@ extension LocalizedStringKey {
             return "Daten konnten nicht verarbeitet werden: \(details)"
         case .errorNetwork(let details):
             return "Netzwerkverbindungsfehler: \(details)"
+            
+        case .settings:
+            return "Einstellungen"
+        case .generalTab:
+            return "Allgemein"
+        case .notificationsTab:
+            return "Mitteilungen"
+        case .launchAtLogin:
+            return "Bei der Anmeldung starten"
+        case .launchAtLoginDescription:
+            return "Beim Starten Ihres Mac automatisch in der Menüleiste öffnen."
+        case .menuBarStyle:
+            return "Menüleisten-Anzeige"
+        case .menuBarIconAndText:
+            return "Symbol & Kontingent"
+        case .menuBarIconOnly:
+            return "Nur Symbol"
+        case .menuBarGaugeSource:
+            return "Ziel für Kreisdiagramm"
+        case .gaugeGemini5h:
+            return "Gemini (5 Stunden)"
+        case .gaugeGeminiWeekly:
+            return "Gemini (Wöchentlich)"
+        case .gaugeClaude5h:
+            return "Claude / GPT (5 Stunden)"
+        case .gaugeClaudeWeekly:
+            return "Claude / GPT (Wöchentlich)"
+        case .popoverStyle:
+            return "Popover-Stil"
+        case .standardMode:
+            return "Standard"
+        case .compactMode:
+            return "Kompakt"
+        case .language:
+            return "Sprache"
+            
+        case .enableNotifications:
+            return "Kontingent-Mitteilungen aktivieren"
+        case .notifyFiveHour:
+            return "5-Stunden-Kontingent-Reset-Mitteilung"
+        case .notifyWeekly:
+            return "Wöchentliche Kontingent-Reset-Mitteilung"
+        case .timeSensitiveAlert:
+            return "Dringliche Mitteilung (Fokus durchbrechen)"
+        case .timeSensitiveDescription:
+            return "Mitteilungen auch im Nicht-Stören- oder Fokusmodus sofort als Banner anzeigen."
+        case .sendTestNotification:
+            return "Testmitteilung senden"
+        case .notificationTitleRefilled:
+            return "✦ Antigravity Kontingent aufgefüllt"
+        case .notificationBodyRefilled(let model, let window):
+            return "Das \(window)-Kontingent für \(model) wurde auf 100% aufgefüllt. Sie können weiterarbeiten!"
+        case .notificationTestBody:
+            return "Testmitteilung erfolgreich empfangen. Sie werden bei Kontingent-Resets benachrichtigt."
+        case .notificationPermissionDenied:
+            return "Bitte Mitteilungen für Antigravity Quota in den macOS-Systemeinstellungen > Mitteilungen erlauben."
+        case .notificationPermissionRequired:
+            return "Mitteilungsberechtigung erforderlich"
+        case .notificationPermissionDescription:
+            return "Um Kontingent-Reset-Mitteilungen zu erhalten, müssen Mitteilungen in den macOS-Systemeinstellungen erlaubt sein."
+        case .openSystemSettings:
+            return "macOS-Systemeinstellungen öffnen"
+        case .requestPermission:
+            return "Mitteilungen erlauben"
+        case .notificationPermissionGranted:
+            return "macOS-Mitteilungen sind aktiviert und aktiv."
         }
     }
 }

@@ -385,4 +385,114 @@ final class QuotaModelTests: XCTestCase {
         
         topBarWindow.orderOut(nil)
     }
+    
+    // MARK: - New Feature Unit Tests
+    
+    func testQuotaBucketRefillDetectionAndCopy() {
+        let now = Date()
+        let pastDate = now.addingTimeInterval(-60) // 1 minute ago
+        let futureDate = now.addingTimeInterval(3600) // 1 hour later
+        
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        
+        // 1. Bucket whose resetTime has already passed and quota was 20%
+        let expiredBucket = QuotaBucket(
+            bucketId: "test-5h",
+            displayName: "Test 5h",
+            window: "5h",
+            remainingFraction: 0.2,
+            resetTime: formatter.string(from: pastDate)
+        )
+        XCTAssertTrue(expiredBucket.isRefilled(at: now), "Bucket with past resetDate should be marked refilled")
+        
+        let refilled = expiredBucket.refilledCopy()
+        XCTAssertEqual(refilled.remainingFraction, 1.0)
+        XCTAssertEqual(refilled.remainingPercentage, 100)
+        XCTAssertNil(refilled.resetTime)
+        
+        // 2. Bucket whose resetTime is in the future
+        let pendingBucket = QuotaBucket(
+            bucketId: "test-future",
+            displayName: "Test Future",
+            window: "5h",
+            remainingFraction: 0.5,
+            resetTime: formatter.string(from: futureDate)
+        )
+        XCTAssertFalse(pendingBucket.isRefilled(at: now), "Bucket with future resetDate should NOT be marked refilled")
+        
+        // 3. Bucket already at 100%
+        let fullBucket = QuotaBucket(
+            bucketId: "test-full",
+            displayName: "Test Full",
+            window: "5h",
+            remainingFraction: 1.0,
+            resetTime: formatter.string(from: pastDate)
+        )
+        XCTAssertFalse(fullBucket.isRefilled(at: now), "Bucket already at 100% does not need refill")
+    }
+    
+    func testAppSettingsDefaultsAndPersistence() {
+        let settings = AppSettings.shared
+        
+        // Check default states
+        XCTAssertTrue(settings.showMenuBarText)
+        XCTAssertEqual(settings.menuBarGaugeSource, .gemini5h, "Default gauge source must be gemini5h")
+        XCTAssertTrue(settings.notifyQuotaRefilled)
+        XCTAssertTrue(settings.notifyFiveHourReset)
+        XCTAssertTrue(settings.notifyWeeklyReset)
+        
+        // Test toggles
+        settings.showMenuBarText = false
+        XCTAssertFalse(settings.showMenuBarText)
+        settings.showMenuBarText = true
+        XCTAssertTrue(settings.showMenuBarText)
+        
+        settings.menuBarGaugeSource = .claudeWeekly
+        XCTAssertEqual(settings.menuBarGaugeSource, .claudeWeekly)
+        settings.menuBarGaugeSource = .gemini5h
+        XCTAssertEqual(settings.menuBarGaugeSource, .gemini5h)
+    }
+    
+    func testMenuBarIconRenderer() {
+        let renderer = MenuBarIconRenderer.shared
+        
+        let onlineIcon = renderer.renderIcon(remainingFraction: 0.75, isOnline: true)
+        XCTAssertEqual(onlineIcon.size.width, 18)
+        XCTAssertEqual(onlineIcon.size.height, 18)
+        XCTAssertTrue(onlineIcon.isTemplate)
+        
+        let offlineIcon = renderer.renderIcon(remainingFraction: 0.20, isOnline: false)
+        XCTAssertEqual(offlineIcon.size.width, 18)
+        XCTAssertEqual(offlineIcon.size.height, 18)
+        XCTAssertTrue(offlineIcon.isTemplate)
+    }
+    
+    func testLocalizedStringsSettingsAndNotificationsAllLanguages() {
+        for lang in AppLanguage.allCases {
+            let settingsTitle = LocalizedStringKey.settings.string(for: lang)
+            XCTAssertFalse(settingsTitle.isEmpty, "Missing settings translation for \(lang)")
+            
+            let general = LocalizedStringKey.generalTab.string(for: lang)
+            XCTAssertFalse(general.isEmpty, "Missing generalTab translation for \(lang)")
+            
+            let notifications = LocalizedStringKey.notificationsTab.string(for: lang)
+            XCTAssertFalse(notifications.isEmpty, "Missing notificationsTab translation for \(lang)")
+            
+            let gaugeTarget = LocalizedStringKey.menuBarGaugeSource.string(for: lang)
+            XCTAssertFalse(gaugeTarget.isEmpty, "Missing menuBarGaugeSource translation for \(lang)")
+            
+            let g5h = LocalizedStringKey.gaugeGemini5h.string(for: lang)
+            XCTAssertFalse(g5h.isEmpty, "Missing gaugeGemini5h translation for \(lang)")
+            
+            let launch = LocalizedStringKey.launchAtLogin.string(for: lang)
+            XCTAssertFalse(launch.isEmpty, "Missing launchAtLogin translation for \(lang)")
+            
+            let notifyRefilled = LocalizedStringKey.notificationTitleRefilled.string(for: lang)
+            XCTAssertFalse(notifyRefilled.isEmpty, "Missing notificationTitleRefilled for \(lang)")
+            
+            let body = LocalizedStringKey.notificationBodyRefilled(model: "Gemini", window: "5h").string(for: lang)
+            XCTAssertTrue(body.contains("Gemini"), "Body should interpolate model name for \(lang)")
+        }
+    }
 }

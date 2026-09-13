@@ -69,6 +69,72 @@ extension LocalizedStringKey {
             return "데이터 파싱 실패: \(details)"
         case .errorNetwork(let details):
             return "네트워크 오류: \(details)"
+            
+        case .settings:
+            return "설정"
+        case .generalTab:
+            return "일반"
+        case .notificationsTab:
+            return "알림"
+        case .launchAtLogin:
+            return "로그인 시 자동 실행"
+        case .launchAtLoginDescription:
+            return "Mac 시작 시 백그라운드 메뉴바로 자동 실행됩니다."
+        case .menuBarStyle:
+            return "메뉴바 표시"
+        case .menuBarIconAndText:
+            return "아이콘 및 잔여 쿼터"
+        case .menuBarIconOnly:
+            return "아이콘만 표시"
+        case .menuBarGaugeSource:
+            return "원형 게이지 표시 기준"
+        case .gaugeGemini5h:
+            return "Gemini (5시간)"
+        case .gaugeGeminiWeekly:
+            return "Gemini (일주일)"
+        case .gaugeClaude5h:
+            return "Claude / GPT (5시간)"
+        case .gaugeClaudeWeekly:
+            return "Claude / GPT (일주일)"
+        case .popoverStyle:
+            return "팝오버 모드"
+        case .standardMode:
+            return "기본 모드"
+        case .compactMode:
+            return "컴팩트 모드"
+        case .language:
+            return "언어"
+            
+        case .enableNotifications:
+            return "쿼터 충전 알림 받기"
+        case .notifyFiveHour:
+            return "5시간 쿼터 충전 알림"
+        case .notifyWeekly:
+            return "일주일 쿼터 충전 알림"
+        case .timeSensitiveAlert:
+            return "시간 민감 알림 (집중 모드 관통)"
+        case .timeSensitiveDescription:
+            return "방해금지 및 집중 모드 중에도 화면에 즉시 알림 배너를 표시합니다."
+        case .sendTestNotification:
+            return "테스트 알림 보내기"
+        case .notificationTitleRefilled:
+            return "✦ Antigravity 쿼터 충전 완료"
+        case .notificationBodyRefilled(let model, let window):
+            return "\(model)의 \(window) 쿼터가 100% 충전되었습니다. 다시 작업하실 수 있습니다!"
+        case .notificationTestBody:
+            return "알림이 정상적으로 수신되었습니다. 쿼터 완충 시 알림을 받으실 수 있습니다."
+        case .notificationPermissionDenied:
+            return "macOS [시스템 설정] > [알림]에서 Antigravity Quota 알림을 허용해 주세요."
+        case .notificationPermissionRequired:
+            return "알림 권한 필요"
+        case .notificationPermissionDescription:
+            return "쿼터 충전 알림을 받으려면 macOS 시스템 설정에서 알림을 허용해야 합니다."
+        case .openSystemSettings:
+            return "macOS 시스템 설정 열기"
+        case .requestPermission:
+            return "알림 권한 허용하기"
+        case .notificationPermissionGranted:
+            return "macOS 시스템 알림이 허용되어 있습니다."
         }
     }
 }
