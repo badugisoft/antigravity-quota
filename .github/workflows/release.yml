@@ -1,0 +1,75 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 1.0.0)'
+        required: true
+        default: '1.0.0'
+
+jobs:
+  build-and-release:
+    name: Build & Release macOS App
+    runs-on: macos-14
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show macOS and Xcode environment
+        run: |
+          sw_vers
+          xcodebuild -version
+          swift --version
+
+      - name: Run unit & integration tests
+        run: swift test
+
+      - name: Package Release (.dmg & .zip)
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          echo "Packaging version: $VERSION"
+          ./scripts/package_release.sh "$VERSION"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Antigravity Quota ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            build/Antigravity-Quota-*.dmg
+            build/Antigravity-Quota-*.zip
+          body: |
+            ## Antigravity Quota ${{ github.ref_name }}
+
+            A lightweight, real-time macOS menu bar quota monitor & WidgetKit widgets for Google Antigravity.
+
+            ### Download & Installation
+
+            1. Download **`Antigravity-Quota-${{ github.ref_name }}.dmg`** (or the `.zip` archive) below.
+            2. Open the disk image and drag **Antigravity Quota.app** into your **Applications** folder.
+            3. **First-Time Launch (Gatekeeper Notice)**:
+               - Since this open-source build is ad-hoc signed without an Apple Developer ID subscription:
+                 - **Right-click** (or Control-click) `Antigravity Quota.app` in `/Applications` and select **Open**, then click **Open** in the dialog.
+                 - Alternatively, open **System Settings** > **Privacy & Security**, scroll down, and click **Open Anyway**.
+                 - Or run in Terminal: `xattr -cr "/Applications/Antigravity Quota.app"`
+
+            ### Key Features
+            - **Real-Time Quota Tracking**: Monitors Gemini & Claude / GPT rolling 5-Hour and Weekly limits.
+            - **macOS Desktop & Notification Center Widgets**: Native Small (1x1) and Medium (1x2) WidgetKit widgets with `.regularMaterial` frosted glass.
+            - **Intelligent Quota-Driven Burst Polling**: Accelerates to 15s during active AI sessions (with a 3-minute cooldown) and steps down to 60s when idle.
+            - **Multi-Language Support**: English, 한국어, 简体中文, 日本語, Deutsch, Français, and Español.
+            - **Zero External Dependencies**: Pure Swift / SwiftUI / AppKit / WidgetKit.

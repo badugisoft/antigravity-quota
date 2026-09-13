@@ -126,7 +126,21 @@ Antigravity runs an internal language server daemon (`language_server`) listenin
 
 ## Installation & Building
 
-### 1. Build and Install via Script (Recommended)
+### 1. Download Pre-built App (DMG)
+
+Download the latest disk image from [GitHub Releases](https://github.com/badugisoft/antigravity-quota/releases):
+
+1. Download **`Antigravity-Quota-<version>.dmg`** and open it.
+2. Drag **Antigravity Quota.app** into your **Applications** folder.
+3. **First-Time Launch (Gatekeeper)**:
+   - Since this open-source build is distributed with ad-hoc signing, macOS may show an unverified developer prompt.
+   - **Right-click** `Antigravity Quota.app` in `/Applications` and click **Open**, then confirm with **Open**.
+   - Or run in Terminal:
+     ```bash
+     xattr -cr "/Applications/Antigravity Quota.app"
+     ```
+
+### 2. Build and Install via Script from Source
 
 Run the included automated build script from the repository root:
 
@@ -170,9 +184,13 @@ To have Antigravity Quota start automatically when your Mac boots:
 
 ```
 antigravity-quota/
+├── .github/
+│   └── workflows/
+│       └── release.yml                       # GitHub Actions CI/CD release workflow
 ├── Package.swift                             # SwiftPM multi-target configuration
 ├── LICENSE                                   # MIT License
 ├── README.md                                 # English documentation
+├── AGENTS.md                                 # Guidelines for AI agents & contributors
 ├── assets/                                   # Documentation screenshots and preview assets
 │   ├── menubar_summary.png                   # Status bar snapshot
 │   ├── popover_standard.png                  # Standard mode popover
@@ -181,7 +199,8 @@ antigravity-quota/
 │   ├── widget_medium.png                     # Medium 1x2 macOS widget
 │   └── app_icon.png                          # 512x512 app icon
 ├── scripts/
-│   ├── build_app.sh                          # App & WidgetKit extension packaging script
+│   ├── build_app.sh                          # App & WidgetKit extension build script
+│   ├── package_release.sh                    # Automated .dmg and .zip release packager
 │   └── entitlements/                         # macOS App Sandbox & group entitlements
 │       ├── app.entitlements                  # Host app entitlements
 │       └── widget.entitlements               # Sandboxed widget extension entitlements

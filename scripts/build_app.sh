@@ -147,6 +147,11 @@ codesign --force --sign - "$APP_DIR"
 
 echo "==> Done! App bundle created at: $APP_DIR"
 
+if [ -n "$NO_INSTALL" ]; then
+    echo "==> Skipping local installation (NO_INSTALL is set)."
+    exit 0
+fi
+
 # Install locally to /Applications
 echo "==> Installing to /Applications/$APP_NAME..."
 pkill -f "AntigravityQuota" 2>/dev/null || true
