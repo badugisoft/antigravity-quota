@@ -121,6 +121,7 @@ public final class QuotaViewModel: ObservableObject {
                     languageCode: lang.rawValue
                 )
                 QuotaDataStore.shared.save(snapshot: snapshot)
+                self.syncScheduledNotifications()
             }
             .store(in: &cancellables)
     }
@@ -144,6 +145,27 @@ public final class QuotaViewModel: ObservableObject {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.updateLowestRemainingFraction()
+            }
+            .store(in: &cancellables)
+            
+        settings.$notifyQuotaRefilled
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.syncScheduledNotifications()
+            }
+            .store(in: &cancellables)
+            
+        settings.$notifyFiveHourReset
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.syncScheduledNotifications()
+            }
+            .store(in: &cancellables)
+            
+        settings.$notifyWeeklyReset
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.syncScheduledNotifications()
             }
             .store(in: &cancellables)
     }
@@ -245,6 +267,7 @@ public final class QuotaViewModel: ObservableObject {
                 languageCode: self.localization.currentLanguage.rawValue
             )
             QuotaDataStore.shared.save(snapshot: snapshot)
+            syncScheduledNotifications()
         } catch {
             self.errorMessage = error.localizedDescription
             self.isServerOnline = false
@@ -281,6 +304,35 @@ public final class QuotaViewModel: ObservableObject {
         self.lowestRemainingFraction = max(0.0, min(1.0, fraction))
     }
     
+    /// Synchronizes pre-scheduled system notifications with the current state of all quota buckets.
+    public func syncScheduledNotifications() {
+        guard settings.notifyQuotaRefilled else {
+            NotificationManager.shared.cancelAllScheduledRefillAlerts()
+            return
+        }
+        
+        let now = Date()
+        for group in groups {
+            for bucket in group.buckets {
+                if bucket.remainingPercentage < 100,
+                   let resetDate = bucket.parsedResetDate,
+                   resetDate > now {
+                    let windowLabel = bucket.window ?? bucket.displayName
+                    NotificationManager.shared.scheduleQuotaRefillAlert(
+                        bucketId: bucket.bucketId,
+                        modelName: group.displayName,
+                        window: windowLabel,
+                        targetDate: resetDate,
+                        settings: settings,
+                        language: localization.currentLanguage
+                    )
+                } else {
+                    NotificationManager.shared.cancelScheduledRefillAlert(bucketId: bucket.bucketId)
+                }
+            }
+        }
+    }
+    
     public func checkAndApplyQuotaRefills(at now: Date) {
         var didChange = false
         var updatedGroups = groups
@@ -290,17 +342,8 @@ public final class QuotaViewModel: ObservableObject {
             for bIndex in 0..<updatedBuckets.count {
                 let bucket = updatedBuckets[bIndex]
                 if bucket.isRefilled(at: now) {
-                    // Send local notification
-                    let windowLabel = bucket.window ?? bucket.displayName
-                    let resetKey = "\(bucket.bucketId)_\(bucket.resetTime ?? "")"
-                    
-                    NotificationManager.shared.notifyQuotaRefilled(
-                        modelName: updatedGroups[gIndex].displayName,
-                        window: windowLabel,
-                        resetKey: resetKey,
-                        settings: settings,
-                        language: localization.currentLanguage
-                    )
+                    // Cancel scheduled alert (or clear leftover request) since it has refilled
+                    NotificationManager.shared.cancelScheduledRefillAlert(bucketId: bucket.bucketId)
                     
                     // Optimistically refill the bucket to 100% capacity
                     updatedBuckets[bIndex] = bucket.refilledCopy()

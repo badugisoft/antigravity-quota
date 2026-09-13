@@ -9,6 +9,7 @@ cd "$ROOT_DIR"
 swift build -c release
 
 APP_NAME="Antigravity Quota.app"
+APP_VERSION="${APP_VERSION:-1.1.1}"
 BUILD_DIR="$ROOT_DIR/build"
 APP_DIR="$BUILD_DIR/$APP_NAME"
 CONTENTS_DIR="$APP_DIR/Contents"
@@ -64,7 +65,7 @@ cat <<EOF > "$CONTENTS_DIR/Info.plist"
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0.0</string>
+    <string>${APP_VERSION}</string>
     <key>CFBundleSupportedPlatforms</key>
     <array>
         <string>MacOSX</string>
@@ -121,7 +122,7 @@ if [ -f "$WIDGET_BIN_PATH" ]; then
     <key>CFBundlePackageType</key>
     <string>XPC!</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0.0</string>
+    <string>${APP_VERSION}</string>
     <key>CFBundleSupportedPlatforms</key>
     <array>
         <string>MacOSX</string>
