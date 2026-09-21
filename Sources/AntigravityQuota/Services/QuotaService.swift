@@ -41,12 +41,23 @@ public final class QuotaService: QuotaServiceProtocol {
         self.discovery = discovery
     }
     
-    /// Fetches the live quota summary from the discovered local language_server.
+    /// Fetches the live quota summary from the discovered local language_server, or falls back to remote SSH if enabled.
     public func fetchQuotaSummary() async throws -> QuotaResponseData {
-        guard let endpoint = await discovery.discoverEndpoint() else {
-            throw QuotaServiceError.serverNotFound
+        if let endpoint = await discovery.discoverEndpoint() {
+            return try await fetchLocalQuota(endpoint: endpoint)
         }
         
+        // Remote SSH Fallback
+        let settings = AppSettings.shared
+        let host = settings.remoteSSHHost.trimmingCharacters(in: .whitespacesAndNewlines)
+        if settings.enableRemoteSSH && !host.isEmpty {
+            return try await RemoteSSHQuotaService.shared.fetchQuotaSummary(host: host)
+        }
+        
+        throw QuotaServiceError.serverNotFound
+    }
+    
+    private func fetchLocalQuota(endpoint: LanguageServerEndpoint) async throws -> QuotaResponseData {
         guard let url = endpoint.baseUrl?.appendingPathComponent("exa.language_server_pb.LanguageServerService/RetrieveUserQuotaSummary") else {
             throw QuotaServiceError.serverNotFound
         }

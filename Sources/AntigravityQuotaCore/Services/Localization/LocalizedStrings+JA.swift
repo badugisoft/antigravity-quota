@@ -135,6 +135,37 @@ extension LocalizedStringKey {
             return "通知権限を許可"
         case .notificationPermissionGranted:
             return "macOS システム通知が許可されています。"
+            
+        case .remoteTab:
+            return "リモート"
+        case .enableRemoteSSH:
+            return "リモートSSHクォータ照会を使用"
+        case .enableRemoteSSHDescription:
+            return "ローカルにAntigravityプロセスがない場合、リモートマシンからSSH経由で照会します。"
+        case .remoteSSHHost:
+            return "SSHホスト"
+        case .remoteSSHHostPlaceholder:
+            return "user@192.168.1.10 または ssh_config のエイリアス"
+        case .remoteSSHInterval:
+            return "リモート照会間隔"
+        case .remoteInterval30s:
+            return "30秒"
+        case .remoteInterval60s:
+            return "1分 (デフォルト)"
+        case .remoteInterval120s:
+            return "2分"
+        case .remoteInterval300s:
+            return "5分"
+        case .testConnection:
+            return "接続テスト"
+        case .testingConnection:
+            return "接続確認中..."
+        case .testConnectionSuccess:
+            return "接続成功 (クォータ正常受信)"
+        case .testConnectionFailed(let details):
+            return "接続失敗: \(details)"
+        case .sshNotice:
+            return "パスワードなしで接続できるよう、SSH鍵認証が事前に設定されている必要があります。"
         }
     }
 }

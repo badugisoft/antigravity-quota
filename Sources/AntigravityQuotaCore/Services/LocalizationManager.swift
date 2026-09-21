@@ -185,6 +185,23 @@ public enum LocalizedStringKey {
     case requestPermission
     case notificationPermissionGranted
     
+    // Remote SSH Sync
+    case remoteTab
+    case enableRemoteSSH
+    case enableRemoteSSHDescription
+    case remoteSSHHost
+    case remoteSSHHostPlaceholder
+    case remoteSSHInterval
+    case remoteInterval30s
+    case remoteInterval60s
+    case remoteInterval120s
+    case remoteInterval300s
+    case testConnection
+    case testingConnection
+    case testConnectionSuccess
+    case testConnectionFailed(details: String)
+    case sshNotice
+    
     public func string(for language: AppLanguage) -> String {
         switch language {
         case .en: return englishString

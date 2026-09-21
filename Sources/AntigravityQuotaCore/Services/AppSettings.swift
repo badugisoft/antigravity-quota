@@ -25,6 +25,9 @@ public final class AppSettings: ObservableObject {
         static let notifyFiveHourReset = "notifyFiveHourReset"
         static let notifyWeeklyReset = "notifyWeeklyReset"
         static let isCompactMode = "isCompactMode"
+        static let enableRemoteSSH = "enableRemoteSSH"
+        static let remoteSSHHost = "remoteSSHHost"
+        static let remoteSSHInterval = "remoteSSHInterval"
     }
     
     private let defaults = UserDefaults.standard
@@ -69,6 +72,21 @@ public final class AppSettings: ObservableObject {
         didSet { defaults.set(isCompactMode, forKey: Keys.isCompactMode) }
     }
     
+    /// Whether to fall back to querying a remote machine via SSH when local language_server is offline.
+    @Published public var enableRemoteSSH: Bool {
+        didSet { defaults.set(enableRemoteSSH, forKey: Keys.enableRemoteSSH) }
+    }
+    
+    /// Remote SSH host (e.g. user@hostname or ssh_config alias).
+    @Published public var remoteSSHHost: String {
+        didSet { defaults.set(remoteSSHHost, forKey: Keys.remoteSSHHost) }
+    }
+    
+    /// Polling interval in seconds when querying via remote SSH (default: 60s).
+    @Published public var remoteSSHInterval: Int {
+        didSet { defaults.set(remoteSSHInterval, forKey: Keys.remoteSSHInterval) }
+    }
+    
     public init() {
         // Default menuBarGaugeSource is .gemini5h
         if let savedSource = defaults.string(forKey: Keys.menuBarGaugeSource),
@@ -107,6 +125,12 @@ public final class AppSettings: ObservableObject {
         }
         
         self.isCompactMode = defaults.bool(forKey: Keys.isCompactMode)
+        
+        // Remote SSH defaults
+        self.enableRemoteSSH = defaults.bool(forKey: Keys.enableRemoteSSH)
+        self.remoteSSHHost = defaults.string(forKey: Keys.remoteSSHHost) ?? ""
+        let savedInterval = defaults.integer(forKey: Keys.remoteSSHInterval)
+        self.remoteSSHInterval = savedInterval > 0 ? savedInterval : 60
         
         // Sync launch at login status from system if available
         syncLaunchAtLoginStatus()

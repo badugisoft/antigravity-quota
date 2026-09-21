@@ -70,6 +70,10 @@
   - **60-Second Idle Polling**: When no AI quota consumption occurs, polling automatically steps down to 60s to conserve battery and CPU.
   - **Instant Focus Refresh**: Switching to the Antigravity window triggers an immediate sync to catch new changes on demand.
   - **Automatic Pause**: Polling gracefully pauses when Antigravity is quit or offline (`⏸️`), resuming instantly when re-launched.
+- **Remote SSH Fallback (Multi-Machine Sync)**:
+  - When working across multiple Macs where Antigravity is not actively running on the local machine, Antigravity Quota can seamlessly query your remote machine via SSH.
+  - Fully configurable in **Settings > Remote**: enable toggle, target SSH host (supports `user@hostname` or `~/.ssh/config` aliases), configurable polling interval (30s, 1m, 2m, 5m), and built-in connection testing.
+  - Executes direct remote RPC queries with zero lingering tunnel daemons, no external dependencies, and no file synchronization overhead.
 - **Compact & Standard View Modes**:
   - **Standard Mode**: Detailed cards with visual progress gradients, percentages, and scheduled reset times.
   - **Compact Mode**: Ultra-slim, minimal view designed for zero scrolling and minimal screen real estate.

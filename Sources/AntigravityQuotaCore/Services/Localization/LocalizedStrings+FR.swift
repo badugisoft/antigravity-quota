@@ -135,6 +135,37 @@ extension LocalizedStringKey {
             return "Autoriser les notifications"
         case .notificationPermissionGranted:
             return "Les notifications système macOS sont activées."
+            
+        case .remoteTab:
+            return "Distant"
+        case .enableRemoteSSH:
+            return "Activer la requête de quota SSH distante"
+        case .enableRemoteSSHDescription:
+            return "Interroge le quota depuis une machine distante via SSH quand Antigravity n'est pas actif localement."
+        case .remoteSSHHost:
+            return "Hôte SSH"
+        case .remoteSSHHostPlaceholder:
+            return "user@192.168.1.10 ou alias ssh_config"
+        case .remoteSSHInterval:
+            return "Intervalle d'interrogation distante"
+        case .remoteInterval30s:
+            return "30 secondes"
+        case .remoteInterval60s:
+            return "1 minute (Défaut)"
+        case .remoteInterval120s:
+            return "2 minutes"
+        case .remoteInterval300s:
+            return "5 minutes"
+        case .testConnection:
+            return "Tester la connexion"
+        case .testingConnection:
+            return "Test de connexion..."
+        case .testConnectionSuccess:
+            return "Connexion réussie (quota reçu)"
+        case .testConnectionFailed(let details):
+            return "Échec de connexion : \(details)"
+        case .sshNotice:
+            return "L'authentification par clé SSH doit être configurée au préalable pour se connecter sans mot de passe."
         }
     }
 }

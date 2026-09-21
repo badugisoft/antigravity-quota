@@ -135,6 +135,37 @@ extension LocalizedStringKey {
             return "允许通知权限"
         case .notificationPermissionGranted:
             return "macOS 系统通知已启用。"
+            
+        case .remoteTab:
+            return "远程"
+        case .enableRemoteSSH:
+            return "启用远程 SSH 配额查询"
+        case .enableRemoteSSHDescription:
+            return "当本地未运行 Antigravity 进程时，通过 SSH 从远程主机查询配额。"
+        case .remoteSSHHost:
+            return "SSH 主机"
+        case .remoteSSHHostPlaceholder:
+            return "user@192.168.1.10 或 ssh_config 别名"
+        case .remoteSSHInterval:
+            return "远程轮询间隔"
+        case .remoteInterval30s:
+            return "30 秒"
+        case .remoteInterval60s:
+            return "1 分钟 (默认)"
+        case .remoteInterval120s:
+            return "2 分钟"
+        case .remoteInterval300s:
+            return "5 分钟"
+        case .testConnection:
+            return "测试连接"
+        case .testingConnection:
+            return "正在测试连接..."
+        case .testConnectionSuccess:
+            return "连接成功 (成功获取配额)"
+        case .testConnectionFailed(let details):
+            return "连接失败: \(details)"
+        case .sshNotice:
+            return "必须预先配置 SSH 密钥免密登录认证，以便无需密码即可连接。"
         }
     }
 }

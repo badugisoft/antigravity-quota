@@ -135,6 +135,37 @@ extension LocalizedStringKey {
             return "Allow Notifications"
         case .notificationPermissionGranted:
             return "macOS notifications are enabled and active."
+            
+        case .remoteTab:
+            return "Remote"
+        case .enableRemoteSSH:
+            return "Enable Remote SSH Query"
+        case .enableRemoteSSHDescription:
+            return "Queries quota from a remote machine via SSH when Antigravity is not running locally."
+        case .remoteSSHHost:
+            return "SSH Host"
+        case .remoteSSHHostPlaceholder:
+            return "user@192.168.1.10 or ssh_config alias"
+        case .remoteSSHInterval:
+            return "Remote Polling Interval"
+        case .remoteInterval30s:
+            return "30 seconds"
+        case .remoteInterval60s:
+            return "1 minute (Default)"
+        case .remoteInterval120s:
+            return "2 minutes"
+        case .remoteInterval300s:
+            return "5 minutes"
+        case .testConnection:
+            return "Test Connection"
+        case .testingConnection:
+            return "Testing connection..."
+        case .testConnectionSuccess:
+            return "Connection successful (quota received)"
+        case .testConnectionFailed(let details):
+            return "Connection failed: \(details)"
+        case .sshNotice:
+            return "SSH key-based authentication must be configured in advance so it can connect without a password prompt."
         }
     }
 }

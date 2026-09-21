@@ -15,6 +15,9 @@ public struct MenuBarPopoverView: View {
         if !viewModel.isServerOnline {
             return localization.string(.statusOffline)
         }
+        if viewModel.isRemoteConnection {
+            return "\(localization.string(.remoteTab)) (\(viewModel.settings.remoteSSHInterval)s)"
+        }
         return viewModel.isAntigravityActive
             ? localization.string(.statusActive(seconds: 15))
             : localization.string(.statusIdle(minutes: 1))
@@ -24,6 +27,9 @@ public struct MenuBarPopoverView: View {
         if !viewModel.isServerOnline {
             return Color.orange
         }
+        if viewModel.isRemoteConnection {
+            return Color.purple
+        }
         return viewModel.isAntigravityActive ? Color.green : Color.blue
     }
     
@@ -32,7 +38,7 @@ public struct MenuBarPopoverView: View {
             // Header: Status indicator, Title, Status badge, Language toggle, Compact toggle
             HStack(alignment: .center, spacing: 6) {
                 Circle()
-                    .fill(viewModel.isServerOnline ? Color.green : Color.orange)
+                    .fill(viewModel.isServerOnline ? (viewModel.isRemoteConnection ? Color.purple : Color.green) : Color.orange)
                     .frame(width: 8, height: 8)
                 
                 Text("Antigravity Quota")

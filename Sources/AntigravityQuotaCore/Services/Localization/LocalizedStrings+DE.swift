@@ -135,6 +135,37 @@ extension LocalizedStringKey {
             return "Mitteilungen erlauben"
         case .notificationPermissionGranted:
             return "macOS-Mitteilungen sind aktiviert und aktiv."
+            
+        case .remoteTab:
+            return "Remote"
+        case .enableRemoteSSH:
+            return "Remote-SSH-Kontingentabfrage aktivieren"
+        case .enableRemoteSSHDescription:
+            return "Fragt Kontingente via SSH von einem Remote-Rechner ab, wenn Antigravity lokal nicht läuft."
+        case .remoteSSHHost:
+            return "SSH-Host"
+        case .remoteSSHHostPlaceholder:
+            return "user@192.168.1.10 oder ssh_config-Alias"
+        case .remoteSSHInterval:
+            return "Remote-Abfrageintervall"
+        case .remoteInterval30s:
+            return "30 Sekunden"
+        case .remoteInterval60s:
+            return "1 Minute (Standard)"
+        case .remoteInterval120s:
+            return "2 Minuten"
+        case .remoteInterval300s:
+            return "5 Minuten"
+        case .testConnection:
+            return "Verbindung testen"
+        case .testingConnection:
+            return "Verbindung wird getestet..."
+        case .testConnectionSuccess:
+            return "Verbindung erfolgreich (Kontingent empfangen)"
+        case .testConnectionFailed(let details):
+            return "Verbindung fehlgeschlagen: \(details)"
+        case .sshNotice:
+            return "SSH-Schlüssel-Authentifizierung muss eingerichtet sein, um ohne Passwortabfrage verbinden zu können."
         }
     }
 }

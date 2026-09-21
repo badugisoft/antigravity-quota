@@ -77,6 +77,11 @@ Sources/
 - Running `swift test` must NOT dirty `assets/*.png`.
 - `testGenerateScreenshots()` in `QuotaModelTests.swift` is gated behind `GENERATE_SCREENSHOTS=1`.
 
+### F. Remote SSH Fallback (Multi-Machine Support)
+- When Antigravity is not detected locally, `QuotaService` falls back to `RemoteSSHQuotaService` if enabled.
+- The remote query executes `/usr/bin/ssh` with `-q`, `BatchMode=yes`, and `ConnectTimeout=5` to extract PID, CSRF token, and listening port on the target machine and invoke `RetrieveUserQuotaSummary` via curl.
+- Never use persistent background tunnel processes (`ssh -L`); direct one-shot RPC queries prevent port conflicts, daemon lifecycle leaks, and stale connections.
+
 ---
 
 ## 4. Common Commands

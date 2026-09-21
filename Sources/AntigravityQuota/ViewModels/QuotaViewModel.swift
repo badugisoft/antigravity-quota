@@ -21,6 +21,9 @@ public final class QuotaViewModel: ObservableObject {
     // Menu bar summary title
     @Published public var menuBarSummary: String = "..."
     
+    // Whether current quota data was fetched via remote SSH
+    @Published public var isRemoteConnection: Bool = false
+    
     // Lowest remaining fraction (0.0 - 1.0) for dynamic gauge icon
     @Published public var lowestRemainingFraction: Double = 1.0
     
@@ -168,6 +171,20 @@ public final class QuotaViewModel: ObservableObject {
                 self?.syncScheduledNotifications()
             }
             .store(in: &cancellables)
+            
+        Publishers.Merge3(
+            settings.$enableRemoteSSH.map { _ in () },
+            settings.$remoteSSHHost.map { _ in () },
+            settings.$remoteSSHInterval.map { _ in () }
+        )
+        .receive(on: RunLoop.main)
+        .sink { [weak self] _ in
+            self?.restartRefreshTimer()
+            Task { [weak self] in
+                await self?.refresh()
+            }
+        }
+        .store(in: &cancellables)
     }
     
     // MARK: - Timers & Adaptive Polling
@@ -213,8 +230,15 @@ public final class QuotaViewModel: ObservableObject {
     private func restartRefreshTimer() {
         refreshTimer?.cancel()
         
-        // 15 seconds during active AI work sessions, 60 seconds when idle
-        let interval: TimeInterval = isAntigravityActive ? 15.0 : 60.0
+        // 15 seconds during active AI work sessions; remoteSSHInterval if remote, else 60 seconds when idle
+        let interval: TimeInterval
+        if isAntigravityActive {
+            interval = 15.0
+        } else if isRemoteConnection || (settings.enableRemoteSSH && !settings.remoteSSHHost.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isServerOnline) {
+            interval = TimeInterval(max(5, settings.remoteSSHInterval))
+        } else {
+            interval = 60.0
+        }
         
         refreshTimer = Timer.publish(every: interval, on: .main, in: .common)
             .autoconnect()
@@ -245,7 +269,16 @@ public final class QuotaViewModel: ObservableObject {
         errorMessage = nil
         
         do {
+            let localEndpoint = await LanguageServerDiscovery.shared.discoverEndpoint()
+            let isRemote = (localEndpoint == nil && settings.enableRemoteSSH && !settings.remoteSSHHost.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            
             let data = try await service.fetchQuotaSummary()
+            
+            let wasRemote = self.isRemoteConnection
+            self.isRemoteConnection = isRemote
+            if wasRemote != isRemote {
+                restartRefreshTimer()
+            }
             
             // If quota decreased, activate burst mode (15s polling)
             if didQuotaDecrease(from: self.groups, to: data.groups) {
@@ -271,6 +304,7 @@ public final class QuotaViewModel: ObservableObject {
         } catch {
             self.errorMessage = error.localizedDescription
             self.isServerOnline = false
+            self.isRemoteConnection = false
             updateLowestRemainingFraction()
             updateMenuBarSummary()
             

@@ -135,6 +135,37 @@ extension LocalizedStringKey {
             return "Permitir notificaciones"
         case .notificationPermissionGranted:
             return "Las notificaciones del sistema macOS están activadas."
+            
+        case .remoteTab:
+            return "Remoto"
+        case .enableRemoteSSH:
+            return "Habilitar consulta de cuota por SSH remoto"
+        case .enableRemoteSSHDescription:
+            return "Consulta la cuota desde una máquina remota mediante SSH cuando Antigravity no se ejecuta localmente."
+        case .remoteSSHHost:
+            return "Host SSH"
+        case .remoteSSHHostPlaceholder:
+            return "user@192.168.1.10 o alias de ssh_config"
+        case .remoteSSHInterval:
+            return "Intervalo de sondeo remoto"
+        case .remoteInterval30s:
+            return "30 segundos"
+        case .remoteInterval60s:
+            return "1 minuto (Predeterminado)"
+        case .remoteInterval120s:
+            return "2 minutos"
+        case .remoteInterval300s:
+            return "5 minutos"
+        case .testConnection:
+            return "Probar conexión"
+        case .testingConnection:
+            return "Probando conexión..."
+        case .testConnectionSuccess:
+            return "Conexión exitosa (cuota recibida)"
+        case .testConnectionFailed(let details):
+            return "Error de conexión: \(details)"
+        case .sshNotice:
+            return "La autenticación por clave SSH debe configurarse previamente para conectarse sin solicitar contraseña."
         }
     }
 }

@@ -452,6 +452,18 @@ final class QuotaModelTests: XCTestCase {
         XCTAssertEqual(settings.menuBarGaugeSource, .claudeWeekly)
         settings.menuBarGaugeSource = .gemini5h
         XCTAssertEqual(settings.menuBarGaugeSource, .gemini5h)
+        
+        // Remote SSH settings
+        settings.enableRemoteSSH = true
+        XCTAssertTrue(settings.enableRemoteSSH)
+        settings.enableRemoteSSH = false
+        XCTAssertFalse(settings.enableRemoteSSH)
+        
+        settings.remoteSSHHost = "user@test-host"
+        XCTAssertEqual(settings.remoteSSHHost, "user@test-host")
+        
+        settings.remoteSSHInterval = 120
+        XCTAssertEqual(settings.remoteSSHInterval, 120)
     }
     
     func testMenuBarIconRenderer() {
@@ -493,6 +505,14 @@ final class QuotaModelTests: XCTestCase {
             
             let body = LocalizedStringKey.notificationBodyRefilled(model: "Gemini", window: "5h").string(for: lang)
             XCTAssertTrue(body.contains("Gemini"), "Body should interpolate model name for \(lang)")
+            
+            // Remote SSH Keys
+            XCTAssertFalse(LocalizedStringKey.remoteTab.string(for: lang).isEmpty, "Missing remoteTab for \(lang)")
+            XCTAssertFalse(LocalizedStringKey.enableRemoteSSH.string(for: lang).isEmpty, "Missing enableRemoteSSH for \(lang)")
+            XCTAssertFalse(LocalizedStringKey.remoteSSHHost.string(for: lang).isEmpty, "Missing remoteSSHHost for \(lang)")
+            XCTAssertFalse(LocalizedStringKey.remoteSSHInterval.string(for: lang).isEmpty, "Missing remoteSSHInterval for \(lang)")
+            XCTAssertFalse(LocalizedStringKey.testConnection.string(for: lang).isEmpty, "Missing testConnection for \(lang)")
+            XCTAssertFalse(LocalizedStringKey.sshNotice.string(for: lang).isEmpty, "Missing sshNotice for \(lang)")
         }
     }
 }
