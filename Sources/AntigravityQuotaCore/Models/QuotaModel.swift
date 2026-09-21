@@ -81,6 +81,11 @@ public struct QuotaBucket: Codable, Identifiable {
         return max(0, 100 - remainingPercentage)
     }
     
+    /// Returns true if the quota is completely unused / 100% capacity (remainingFraction >= 1.0).
+    public var isFull: Bool {
+        return remainingFraction >= 1.0 - 0.0001
+    }
+    
     /// Reset timestamp parsed from ISO 8601 string.
     public var parsedResetDate: Date? {
         guard let resetTime else { return nil }
@@ -93,14 +98,17 @@ public struct QuotaBucket: Codable, Identifiable {
         return formatter.date(from: resetTime)
     }
     
-    /// Time remaining until reset in seconds.
+    /// Time remaining until reset in seconds. Returns 0 if quota is already 100% full.
     public func timeRemaining(from now: Date = Date()) -> TimeInterval {
-        guard let resetDate = parsedResetDate else { return 0 }
+        guard !isFull, let resetDate = parsedResetDate else { return 0 }
         return max(0, resetDate.timeIntervalSince(now))
     }
     
     /// Formatted human-readable countdown string supporting multi-language.
     public func formattedTimeRemaining(from now: Date = Date(), language: AppLanguage = .en) -> String {
+        if isFull {
+            return LocalizedStringKey.quotaUnused.string(for: language)
+        }
         guard let resetDate = parsedResetDate else {
             return "-"
         }

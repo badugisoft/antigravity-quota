@@ -136,6 +136,7 @@ public enum LocalizedStringKey {
     case countdownMinutesSeconds(minutes: Int, seconds: Int)
     case countdownSeconds(seconds: Int)
     case resetComplete
+    case quotaUnused
     
     // Action Buttons & Info
     case refresh

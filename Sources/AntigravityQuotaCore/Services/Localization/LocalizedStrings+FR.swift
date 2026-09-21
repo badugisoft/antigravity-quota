@@ -51,6 +51,8 @@ extension LocalizedStringKey {
             return "Reste \(s)s"
         case .resetComplete:
             return "Réinitialisation terminée"
+        case .quotaUnused:
+            return "Inutilisé"
             
         case .refresh:
             return "Actualiser"

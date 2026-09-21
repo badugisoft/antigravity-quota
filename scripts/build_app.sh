@@ -9,7 +9,7 @@ cd "$ROOT_DIR"
 swift build -c release
 
 APP_NAME="Antigravity Quota.app"
-APP_VERSION="${APP_VERSION:-1.2.0}"
+APP_VERSION="${APP_VERSION:-1.2.1}"
 BUILD_DIR="$ROOT_DIR/build"
 APP_DIR="$BUILD_DIR/$APP_NAME"
 CONTENTS_DIR="$APP_DIR/Contents"

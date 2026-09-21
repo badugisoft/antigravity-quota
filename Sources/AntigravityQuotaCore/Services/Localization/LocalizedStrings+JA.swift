@@ -51,6 +51,8 @@ extension LocalizedStringKey {
             return "残り \(s)秒"
         case .resetComplete:
             return "リセット完了"
+        case .quotaUnused:
+            return "未使用"
             
         case .refresh:
             return "更新"

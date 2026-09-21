@@ -14,6 +14,8 @@ This document provides essential architecture context, operating rules, user ins
    - Preserve application multi-language support (7 languages: `EN`, `KO`, `ZH`, `JA`, `DE`, `FR`, `ES`) in code, UI, and localization dictionaries.
 3. **No External Dependencies**:
    - The project strictly uses pure Swift / SwiftUI / AppKit / WidgetKit. Do not introduce third-party CocoaPods, Carthage, or SPM packages.
+4. **Local Task Completion & Installation**:
+   - Whenever code changes or tasks are completed locally, always execute `./scripts/build_app.sh` to compile, package, install to `/Applications`, and launch the updated app so the user can test immediately.
 
 ---
 
@@ -81,6 +83,19 @@ Sources/
 - When Antigravity is not detected locally, `QuotaService` falls back to `RemoteSSHQuotaService` if enabled.
 - The remote query executes `/usr/bin/ssh` with `-q`, `BatchMode=yes`, and `ConnectTimeout=5` to extract PID, CSRF token, and listening port on the target machine and invoke `RetrieveUserQuotaSummary` via curl.
 - Never use persistent background tunnel processes (`ssh -L`); direct one-shot RPC queries prevent port conflicts, daemon lifecycle leaks, and stale connections.
+
+### G. 100% Full Quota & Rolling Window Countdown Suppression
+- **Rolling Window Quota Reset Behavior**:
+  - Antigravity 5h and weekly limits operate on a rolling window over consumed tokens.
+  - When quota is 100% intact (`remainingFraction >= 1.0`), there is no consumed quota to recover. The backend calculates `resetTime` as `now + 5h` upon each request.
+  - Repeated app activation or refresh would cause the countdown to reset back to 4h 59m, causing confusing jumps.
+- **Suppression Strategy**:
+  - `QuotaBucket.isFull` checks `remainingFraction >= 1.0 - 0.0001`.
+  - When `isFull` is true:
+    - `timeRemaining` returns 0.
+    - `formattedTimeRemaining` displays `quotaUnused` ("미사용" / "Unused") instead of an active countdown.
+    - Scheduled reset times (`resetDate.formattedShortTime`) are hidden in bucket rows.
+    - `QuotaSnapshot.nearestResetDate` ignores full buckets so widget summary countdowns stay clean.
 
 ---
 

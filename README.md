@@ -65,6 +65,7 @@
   - Fully supports macOS Dark Mode and all 7 localized languages.
 - **Live Countdown Clocks**:
   - 1-second interval live countdown clocks showing exact time until the next quota replenishment (e.g., `4h 52m left`, `1d 20h left`).
+  - **100% Full Quota Suppression**: When a quota is 100% full and unused, rolling window countdowns are cleanly paused with an "Unused" (`미사용`) status rather than showing artificial rolling expiration timers.
 - **Adaptive Smart Polling**:
   - **15-Second AI Burst Polling**: When AI activity (token generation, tool calling) causes quota to decrease, polling automatically accelerates to 15s for 3 minutes to provide real-time updates while you work (even if Antigravity is in the background).
   - **60-Second Idle Polling**: When no AI quota consumption occurs, polling automatically steps down to 60s to conserve battery and CPU.

@@ -4,7 +4,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-VERSION="${1:-1.2.0}"
+VERSION="${1:-1.2.1}"
 # Strip leading 'v' if present (e.g. v1.0.0 -> 1.0.0)
 VERSION="${VERSION#v}"
 export APP_VERSION="$VERSION"

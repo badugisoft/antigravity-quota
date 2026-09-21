@@ -99,6 +99,27 @@ final class QuotaModelTests: XCTestCase {
         XCTAssertEqual(bucket.formattedTimeRemaining(from: fakeNow, language: .es), "Quedan 1h 30min")
     }
     
+    func testFullQuotaTimerBehavior() {
+        let fullBucket = QuotaBucket(
+            bucketId: "full-test",
+            displayName: "Full Test",
+            remainingFraction: 1.0,
+            resetTime: "2026-09-13T15:00:00Z"
+        )
+        
+        let formatter = ISO8601DateFormatter()
+        let fakeNow = formatter.date(from: "2026-09-13T10:00:00Z")!
+        
+        // When 100% full, isFull must be true and remaining time must be 0
+        XCTAssertTrue(fullBucket.isFull)
+        XCTAssertEqual(fullBucket.timeRemaining(from: fakeNow), 0)
+        
+        // formattedTimeRemaining must return quotaUnused ("미사용" / "Unused") across languages instead of active countdown
+        XCTAssertEqual(fullBucket.formattedTimeRemaining(from: fakeNow, language: .ko), "미사용")
+        XCTAssertEqual(fullBucket.formattedTimeRemaining(from: fakeNow, language: .en), "Unused")
+        XCTAssertEqual(fullBucket.formattedTimeRemaining(from: fakeNow, language: .ja), "未使用")
+    }
+    
     @MainActor
     func testLocalizationManagerAllLanguages() {
         let manager = LocalizationManager()
@@ -108,6 +129,7 @@ final class QuotaModelTests: XCTestCase {
             XCTAssertFalse(manager.string(.refresh).isEmpty)
             XCTAssertFalse(manager.string(.quit).isEmpty)
             XCTAssertFalse(manager.string(.statusOffline).isEmpty)
+            XCTAssertFalse(manager.string(.quotaUnused).isEmpty)
             XCTAssertFalse(manager.string(.lastUpdated(time: "12:00")).isEmpty)
         }
     }

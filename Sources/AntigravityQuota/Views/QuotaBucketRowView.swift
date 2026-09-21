@@ -86,7 +86,7 @@ public struct QuotaBucketRowView: View {
                 
                 Spacer()
                 
-                if let resetDate = bucket.parsedResetDate {
+                if let resetDate = bucket.parsedResetDate, !bucket.isFull {
                     Text(resetDate.formattedShortTime(for: language))
                         .font(.system(size: 9))
                         .foregroundColor(.secondary.opacity(0.7))

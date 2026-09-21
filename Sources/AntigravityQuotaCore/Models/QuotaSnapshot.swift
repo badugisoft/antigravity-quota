@@ -42,11 +42,12 @@ public struct QuotaSnapshot: Codable {
         })
     }
     
-    /// Returns the nearest reset date across all buckets.
+    /// Finds the earliest reset Date across all buckets that are not yet 100% full.
     public var nearestResetDate: Date? {
         var nearest: Date?
         for group in groups {
             for bucket in group.buckets {
+                guard !bucket.isFull else { continue }
                 if let reset = bucket.parsedResetDate, reset > Date() {
                     if let cur = nearest {
                         if reset < cur { nearest = reset }
@@ -62,6 +63,10 @@ public struct QuotaSnapshot: Codable {
     /// Formatted countdown for the nearest reset date.
     public func formattedNearestReset(from now: Date = Date(), language: AppLanguage = .en) -> String {
         guard let reset = nearestResetDate else {
+            let hasBuckets = groups.contains(where: { !$0.buckets.isEmpty })
+            if isOnline && hasBuckets && groups.allSatisfy({ $0.buckets.allSatisfy { $0.isFull } }) {
+                return LocalizedStringKey.quotaUnused.string(for: language)
+            }
             return "-"
         }
         let interval = reset.timeIntervalSince(now)

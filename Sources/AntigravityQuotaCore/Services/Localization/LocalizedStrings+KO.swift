@@ -51,6 +51,8 @@ extension LocalizedStringKey {
             return "\(s)초 남음"
         case .resetComplete:
             return "리셋 완료"
+        case .quotaUnused:
+            return "미사용"
             
         case .refresh:
             return "새로고침"

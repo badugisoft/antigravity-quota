@@ -51,6 +51,8 @@ extension LocalizedStringKey {
             return "Noch \(s) Sek."
         case .resetComplete:
             return "Reset abgeschlossen"
+        case .quotaUnused:
+            return "Ungenutzt"
             
         case .refresh:
             return "Aktualisieren"
