@@ -95,7 +95,13 @@ Sources/
     - `timeRemaining` returns 0.
     - `formattedTimeRemaining` displays `quotaUnused` ("미사용" / "Unused") instead of an active countdown.
     - Scheduled reset times (`resetDate.formattedShortTime`) are hidden in bucket rows.
-    - `QuotaSnapshot.nearestResetDate` ignores full buckets so widget summary countdowns stay clean.
+### H. Local Process & Listening Port Discovery (lsof over netstat)
+- **Privilege & Output Integrity in Child Processes**:
+  - On macOS (Sonoma, Sequoia), `/usr/sbin/netstat` executed in child processes without full TTY or root permissions can yield 0 bytes of output or omit PID mappings.
+  - `LanguageServerDiscovery` uses `/usr/sbin/lsof -iTCP -sTCP:LISTEN -n -P -a -p <pid>` to reliably extract listening TCP ports for the user's running processes, with a fallback to `netstat`.
+- **Preserve Endpoint Protocol Scheme**:
+  - `language_server` may listen on either HTTP or HTTPS depending on active flags.
+  - Candidate endpoints must preserve their protocol scheme (`httpCandidate` vs `httpsCandidate`); returning an HTTP candidate after HTTPS validation succeeds will cause HTTP 400 Bad Request ('Client sent an HTTP request to an HTTPS server').
 
 ---
 

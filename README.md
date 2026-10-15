@@ -101,9 +101,9 @@ Antigravity runs an internal language server daemon (`language_server`) listenin
 1. **Process & CSRF Token Extraction**:
    Inspects `/bin/ps` to locate the active `language_server` process and securely extracts the session `--csrf_token`.
 2. **Instant Port Resolution**:
-   Uses `/usr/sbin/netstat` to find active listening TCP sockets for the detected PID in sub-milliseconds without port scanning overhead.
+   Uses `/usr/sbin/lsof` (with `/usr/sbin/netstat` fallback) to find active listening TCP sockets for the detected PID in sub-milliseconds without port scanning overhead.
 3. **Connect-RPC Protocol**:
-   Sends HTTP POST requests to `http://127.0.0.1:<port>/exa.language_server_pb.LanguageServerService/RetrieveUserQuotaSummary` with authentication header `x-codeium-csrf-token`.
+   Sends HTTP/HTTPS POST requests to `127.0.0.1:<port>/exa.language_server_pb.LanguageServerService/RetrieveUserQuotaSummary` with authentication header `x-codeium-csrf-token`.
 4. **Shared Data Store & Widget Sync**:
    Writes the latest quota snapshot to the shared suite container and calls `WidgetCenter.shared.reloadAllTimelines()` so widgets reflect fresh numbers instantly.
 5. **Reactive Presentation**:

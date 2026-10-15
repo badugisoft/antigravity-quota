@@ -53,7 +53,7 @@ public final class LanguageServerDiscovery {
             if await testEndpoint(httpsCandidate) {
                 cachedEndpoint = httpsCandidate
                 lastCheckTime = Date()
-                return httpCandidate
+                return httpsCandidate
             }
         }
         
@@ -106,8 +106,55 @@ public final class LanguageServerDiscovery {
         return nil
     }
     
-    /// Finds TCP listening ports for the specified PID using `/usr/sbin/netstat` in sub-milliseconds.
+    /// Finds TCP listening ports for the specified PID using `/usr/sbin/lsof` with `/usr/sbin/netstat` fallback.
     private func findListeningPorts(for pid: Int32) -> [Int] {
+        var ports = findListeningPortsViaLsof(for: pid)
+        if ports.isEmpty {
+            ports = findListeningPortsViaNetstat(for: pid)
+        }
+        return ports
+    }
+    
+    private func findListeningPortsViaLsof(for pid: Int32) -> [Int] {
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/usr/sbin/lsof")
+        task.arguments = ["-iTCP", "-sTCP:LISTEN", "-n", "-P", "-a", "-p", "\(pid)"]
+        
+        let pipe = Pipe()
+        task.standardOutput = pipe
+        task.standardError = Pipe()
+        
+        var ports: [Int] = []
+        
+        do {
+            try task.run()
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            task.waitUntilExit()
+            
+            guard let output = String(data: data, encoding: .utf8) else { return ports }
+            
+            let lines = output.components(separatedBy: "\n")
+            for line in lines {
+                guard line.contains("LISTEN") else { continue }
+                let tokens = line.split(whereSeparator: { $0.isWhitespace })
+                for token in tokens {
+                    let str = String(token)
+                    if let colonIndex = str.lastIndex(of: ":") {
+                        let portStr = String(str[str.index(after: colonIndex)...])
+                        if let port = Int(portStr), !ports.contains(port) {
+                            ports.append(port)
+                        }
+                    }
+                }
+            }
+        } catch {
+            print("[Discovery] Error running lsof: \(error)")
+        }
+        
+        return ports
+    }
+    
+    private func findListeningPortsViaNetstat(for pid: Int32) -> [Int] {
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/sbin/netstat")
         task.arguments = ["-anv", "-p", "tcp"]
@@ -120,7 +167,6 @@ public final class LanguageServerDiscovery {
         
         do {
             try task.run()
-            // Read data before waitUntilExit to avoid pipe deadlocks
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
             task.waitUntilExit()
             
@@ -132,12 +178,10 @@ public final class LanguageServerDiscovery {
             for line in lines {
                 guard line.contains("LISTEN") && line.contains(pidTarget) else { continue }
                 
-                // Example: tcp4 0 0 127.0.0.1.58169 *.* LISTEN ... language_server:14762 ...
                 let tokens = line.split(whereSeparator: { $0.isWhitespace })
                 guard tokens.count >= 4 else { continue }
                 let address = String(tokens[3])
                 
-                // The port number follows the last dot
                 if let lastDotIndex = address.lastIndex(of: ".") {
                     let portString = String(address[address.index(after: lastDotIndex)...])
                     if let port = Int(portString), !ports.contains(port) {
