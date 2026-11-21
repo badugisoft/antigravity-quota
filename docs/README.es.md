@@ -30,6 +30,7 @@
 
 <p align="center">
   <a href="https://github.com/badugisoft/antigravity-quota/releases/latest"><strong>⬇️ Descargar último DMG</strong></a> ·
+  <a href="https://badugisoft.github.io/antigravity-quota/?lang=es"><strong>🌐 Sitio web</strong></a> ·
   <a href="#capturas-de-pantalla">Capturas</a> ·
   <a href="#características">Características</a> ·
   <a href="#instalación-y-compilación">Instalación</a> ·
@@ -274,13 +275,18 @@ antigravity-quota/
 │   ├── PULL_REQUEST_TEMPLATE.md                 # Lista de verificación para Pull Requests
 │   ├── release.yml                              # Reglas de categorías en notas de versión
 │   └── workflows/
-│       └── release.yml                          # Flujo CI/CD de publicación en GitHub Actions
+│       ├── release.yml                          # Flujo CI/CD de publicación en GitHub Actions
+│       └── pages.yml                            # Flujo de despliegue de GitHub Pages
 ├── Package.swift                                # Configuración multi-objetivo de SwiftPM
 ├── LICENSE                                      # Licencia MIT
 ├── README.md                                    # Documentación en inglés (raíz)
 ├── CONTRIBUTING.md                              # Guía del colaborador y convenciones
 ├── SECURITY.md                                  # Política de privacidad y seguridad
 ├── AGENTS.md                                    # Guía para agentes de IA y colaboradores
+├── site/                                        # Sitio web promocional en GitHub Pages (7 idiomas)
+│   ├── index.html                               # Estructura de la página principal
+│   ├── styles.css                               # Estilo macOS adaptable claro/oscuro
+│   └── i18n.js                                  # Traducciones y selector de 7 idiomas
 ├── docs/                                        # Documentación multilingüe
 │   ├── README.ko.md                             # 한국어
 │   ├── README.zh.md                             # 简体中文

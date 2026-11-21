@@ -30,8 +30,10 @@ CONTRIBUTING.md                    # Contributor guidelines & development setup
 SECURITY.md                        # Privacy architecture & vulnerability reporting
 .github/
 ├── ISSUE_TEMPLATE/                # Bug report, feature request & chooser config
-└── PULL_REQUEST_TEMPLATE.md       # PR review & test checklist
+├── PULL_REQUEST_TEMPLATE.md       # PR review & test checklist
+└── workflows/                     # GitHub Actions (release.yml, pages.yml)
 docs/README.<lang>.md              # Localized documentation (ko, zh, ja, de, fr, es)
+site/                              # GitHub Pages promotional site (index.html, styles.css, i18n.js)
 assets/                            # App icon & generated documentation screenshots
 Sources/
 ├── AntigravityQuotaCore/      # Modular core library target

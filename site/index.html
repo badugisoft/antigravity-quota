@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Antigravity Quota — Real-Time macOS Menu Bar Monitor &amp; WidgetKit Widgets</title>
+  <meta name="description" content="A lightweight, real-time macOS menu bar quota monitor and WidgetKit widgets for Google Antigravity. Track Gemini, Claude, and GPT limits 100% locally.">
+  <meta property="og:title" content="Antigravity Quota for macOS">
+  <meta property="og:description" content="Track Gemini, Claude, and GPT model limits, remaining reset timers, and usage percentages directly from your status bar, desktop, and Notification Center.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://badugisoft.github.io/antigravity-quota/">
+  <meta property="og:image" content="https://badugisoft.github.io/antigravity-quota/assets/popover_standard.png">
+  <link rel="icon" type="image/png" href="assets/app_icon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a class="brand" href="#top" aria-label="Antigravity Quota Home">
+        <img src="assets/app_icon.png" alt="" width="28" height="28" onerror="this.onerror=null;this.src='../assets/app_icon.png';">
+        <span>Antigravity Quota</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Primary Navigation">
+        <a href="#screenshots" data-i18n="nav_screenshots">Screenshots</a>
+        <a href="#features" data-i18n="nav_features">Features</a>
+        <a href="#how-it-works" data-i18n="nav_how">How It Works</a>
+        <a href="#install" data-i18n="nav_install">Install</a>
+        <a href="#faq" data-i18n="nav_faq">FAQ</a>
+      </nav>
+
+      <div class="nav-actions">
+        <label class="sr-only" for="lang-select" data-i18n="lang_label">Language</label>
+        <select id="lang-select" class="lang-select" aria-label="Language">
+          <option value="en">English</option>
+          <option value="ko">한국어</option>
+          <option value="zh">简体中文</option>
+          <option value="ja">日本語</option>
+          <option value="de">Deutsch</option>
+          <option value="fr">Français</option>
+          <option value="es">Español</option>
+        </select>
+        <a class="btn btn-ghost btn-sm" href="https://github.com/badugisoft/antigravity-quota" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a class="btn btn-primary btn-sm" href="https://github.com/badugisoft/antigravity-quota/releases/latest" target="_blank" rel="noopener noreferrer" data-i18n="nav_download">Download</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="hero-icon-wrap">
+          <img
+            src="assets/app_icon.png"
+            alt="Antigravity Quota App Icon"
+            class="hero-icon"
+            width="112"
+            height="112"
+            fetchpriority="high"
+            onerror="this.onerror=null;this.src='../assets/app_icon.png';">
+        </div>
+
+        <p class="pill-badge" data-i18n="hero_badge">macOS 13.0+ · Pure Swift &amp; WidgetKit · 100% Local &amp; Private</p>
+
+        <h1 class="hero-title" data-i18n="hero_title">Monitor Google Antigravity Quotas in Real Time</h1>
+
+        <p class="hero-subtitle" data-i18n="hero_subtitle">
+          A lightweight macOS menu bar monitor and native WidgetKit widgets. Track Gemini, Claude, and GPT limits, reset countdowns, and usage percentages directly from your status bar, desktop, and Notification Center.
+        </p>
+
+        <div class="hero-cta">
+          <a class="btn btn-primary btn-lg" href="https://github.com/badugisoft/antigravity-quota/releases/latest" target="_blank" rel="noopener noreferrer" data-i18n="hero_cta_download">
+            Download Latest DMG
+          </a>
+          <a class="btn btn-secondary btn-lg" href="https://github.com/badugisoft/antigravity-quota" target="_blank" rel="noopener noreferrer" data-i18n="hero_cta_github">
+            View on GitHub
+          </a>
+        </div>
+
+        <div class="hero-meta">
+          <span>MIT License</span>
+          <span aria-hidden="true">·</span>
+          <span data-i18n="hero_meta_zero">Zero Telemetry</span>
+          <span aria-hidden="true">·</span>
+          <span data-i18n="hero_meta_lang">7 Languages</span>
+        </div>
+
+        <figure class="menubar-preview">
+          <img
+            src="assets/menubar_summary.png"
+            alt="Status Bar Circular Gauge and Quota Summary"
+            fetchpriority="high"
+            onerror="this.onerror=null;this.src='../assets/menubar_summary.png';">
+          <figcaption data-i18n="cap_menubar">Status Bar Circular Gauge &amp; Dynamic Quota Summary</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="screenshots" class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2 data-i18n="sec_screenshots_title">Native macOS Experience</h2>
+          <p data-i18n="sec_screenshots_sub">Designed with SwiftUI and WidgetKit to blend seamlessly into macOS Light and Dark modes.</p>
+        </div>
+
+        <div class="showcase-grid">
+          <article class="showcase-card">
+            <div class="showcase-media dual">
+              <figure>
+                <img
+                  src="assets/popover_standard.png"
+                  alt="Standard Mode Popover"
+                  loading="lazy"
+                  onerror="this.onerror=null;this.src='../assets/popover_standard.png';">
+                <figcaption data-i18n="cap_standard">Standard Mode</figcaption>
+              </figure>
+              <figure>
+                <img
+                  src="assets/popover_compact.png"
+                  alt="Compact Mode Popover"
+                  loading="lazy"
+                  onerror="this.onerror=null;this.src='../assets/popover_compact.png';">
+                <figcaption data-i18n="cap_compact">Compact Mode</figcaption>
+              </figure>
+            </div>
+            <div class="showcase-body">
+              <h3 data-i18n="show_popover_title">Menu Bar Popover</h3>
+              <p data-i18n="show_popover_desc">Switch between detailed Standard cards with scheduled reset times and an ultra-slim Compact layout with zero scrolling.</p>
+            </div>
+          </article>
+
+          <article class="showcase-card">
+            <div class="showcase-media widgets">
+              <figure>
+                <img
+                  src="assets/widget_small.png"
+                  alt="Small Widget 1x1"
+                  loading="lazy"
+                  onerror="this.onerror=null;this.src='../assets/widget_small.png';">
+                <figcaption data-i18n="cap_widget_small">Small (1×1)</figcaption>
+              </figure>
+              <figure>
+                <img
+                  src="assets/widget_medium.png"
+                  alt="Medium Widget 1x2"
+                  loading="lazy"
+                  onerror="this.onerror=null;this.src='../assets/widget_medium.png';">
+                <figcaption data-i18n="cap_widget_medium">Medium (1×2)</figcaption>
+              </figure>
+            </div>
+            <div class="showcase-body">
+              <h3 data-i18n="show_widget_title">Desktop &amp; Notification Center Widgets</h3>
+              <p data-i18n="show_widget_desc">Native frosted glass (.regularMaterial) widgets with borderless margins and instant WidgetCenter timeline updates.</p>
+            </div>
+          </article>
+        </div>
+
+        <aside class="callout-note">
+          <strong data-i18n="callout_title">🤖 100% Built with Google Antigravity</strong>
+          <p data-i18n="callout_desc">
+            From local RPC discovery and SwiftUI views to WidgetKit extensions, adaptive polling, and 7-language localization, this entire application was designed, implemented, and verified autonomously with Google Antigravity.
+          </p>
+        </aside>
+      </div>
+    </section>
+
+    <section id="features" class="section section-alt">
+      <div class="container">
+        <div class="section-header">
+          <h2 data-i18n="sec_features_title">Built for Daily AI Workflows</h2>
+          <p data-i18n="sec_features_sub">Everything you need to keep track of 5-hour and weekly model quotas without cluttering your workspace.</p>
+        </div>
+
+        <div class="features-grid">
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">📊</div>
+            <h3 data-i18n="feat_1_title">Dynamic Quota Discovery</h3>
+            <p data-i18n="feat_1_desc">Automatically discovers all active model groups and buckets (Gemini, Claude &amp; GPT, Gemini 4 Argon, and future groups) across 5-hour and weekly limits.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">🎯</div>
+            <h3 data-i18n="feat_2_title">Circular Menu Bar Gauge</h3>
+            <p data-i18n="feat_2_desc">Live circular progress ring around the Antigravity logo with Icon + Percentage or Icon Only modes, plus configurable gauge target selection.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">🧩</div>
+            <h3 data-i18n="feat_3_title">Native WidgetKit Widgets</h3>
+            <p data-i18n="feat_3_desc">Small (1×1) and Medium (1×2) desktop and Notification Center widgets styled with native macOS frosted glass material.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">⏱️</div>
+            <h3 data-i18n="feat_4_title">1-Second Live Countdowns</h3>
+            <p data-i18n="feat_4_desc">Real-time reset timers plus smart 100% full quota suppression that displays "Unused" instead of shifting rolling window estimates.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">🔔</div>
+            <h3 data-i18n="feat_5_title">Quota Refill Notifications</h3>
+            <p data-i18n="feat_5_desc">Pre-schedules native macOS notifications to alert you the moment a depleted 5-hour or weekly bucket refills to 100%.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">⚡</div>
+            <h3 data-i18n="feat_6_title">Adaptive Smart Polling</h3>
+            <p data-i18n="feat_6_desc">Accelerates to 15s during active AI consumption (3-minute cooldown) and steps down to 60s when idle to save battery and CPU.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">🌐</div>
+            <h3 data-i18n="feat_7_title">Remote SSH Fallback</h3>
+            <p data-i18n="feat_7_desc">Monitor Antigravity running on another Mac or Linux workstation using direct one-shot SSH RPC queries with zero lingering tunnels.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">🗣️</div>
+            <h3 data-i18n="feat_8_title">7-Language Localization</h3>
+            <p data-i18n="feat_8_desc">Full native support for English, 한국어, 简体中文, 日本語, Deutsch, Français, and Español with instant switching.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">🔒</div>
+            <h3 data-i18n="feat_9_title">100% Local &amp; Pure Swift</h3>
+            <p data-i18n="feat_9_desc">Queries only 127.0.0.1 (or your SSH host). Zero telemetry, zero stored API keys, and zero external third-party dependencies.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="how-it-works" class="section">
+      <div class="container">
+        <div class="section-header">
+          <h2 data-i18n="sec_how_title">How It Works</h2>
+          <p data-i18n="sec_how_sub">Fast, zero-config local discovery without port scanning or external accounts.</p>
+        </div>
+
+        <ol class="steps-grid">
+          <li class="step-card">
+            <span class="step-num">1</span>
+            <h3 data-i18n="how_1_title">Process &amp; CSRF Discovery</h3>
+            <p data-i18n="how_1_desc">Locates the active <code>language_server</code> process and reads its session CSRF token from CLI flags or environment variables.</p>
+          </li>
+          <li class="step-card">
+            <span class="step-num">2</span>
+            <h3 data-i18n="how_2_title">Sub-Millisecond Port Lookup</h3>
+            <p data-i18n="how_2_desc">Uses <code>lsof</code> (with <code>netstat</code> fallback) to find the exact listening TCP port for the discovered PID.</p>
+          </li>
+          <li class="step-card">
+            <span class="step-num">3</span>
+            <h3 data-i18n="how_3_title">Local Connect-RPC</h3>
+            <p data-i18n="how_3_desc">Queries <code>RetrieveUserQuotaSummary</code> on <code>127.0.0.1</code> over HTTP/HTTPS with the CSRF header.</p>
+          </li>
+          <li class="step-card">
+            <span class="step-num">4</span>
+            <h3 data-i18n="how_4_title">Shared Store &amp; Widget Sync</h3>
+            <p data-i18n="how_4_desc">Saves snapshots to Application Support and triggers <code>WidgetCenter.reloadAllTimelines()</code> without TCC prompts.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="install" class="section section-alt">
+      <div class="container">
+        <div class="section-header">
+          <h2 data-i18n="sec_install_title">Get Started in Seconds</h2>
+          <p data-i18n="sec_install_sub">Requires macOS 13.0 (Ventura) or later on Apple Silicon or Intel.</p>
+        </div>
+
+        <div class="install-grid">
+          <article class="install-card">
+            <h3 data-i18n="inst_dmg_title">Option 1: Download Pre-built DMG</h3>
+            <ol class="install-steps">
+              <li data-i18n="inst_dmg_1">Download the latest <code>Antigravity-Quota-&lt;version&gt;.dmg</code> from GitHub Releases.</li>
+              <li data-i18n="inst_dmg_2">Drag <strong>Antigravity Quota.app</strong> into your <strong>Applications</strong> folder.</li>
+              <li data-i18n="inst_dmg_3">On first launch, right-click the app and choose <strong>Open</strong>, or run the command below to clear Gatekeeper quarantine:</li>
+            </ol>
+            <div class="code-box">
+              <code id="cmd-xattr">xattr -cr "/Applications/Antigravity Quota.app"</code>
+              <button type="button" class="copy-btn" data-copy-target="cmd-xattr" data-i18n="btn_copy">Copy</button>
+            </div>
+            <a class="btn btn-primary" href="https://github.com/badugisoft/antigravity-quota/releases/latest" target="_blank" rel="noopener noreferrer" data-i18n="inst_dmg_btn">
+              Download Latest Release
+            </a>
+          </article>
+
+          <article class="install-card">
+            <h3 data-i18n="inst_src_title">Option 2: Build from Source</h3>
+            <p class="install-desc" data-i18n="inst_src_desc">Requires Xcode 15.0+ or Swift 5.9+. The build script compiles Release binaries, packages the WidgetKit extension, signs inside-out, installs to <code>/Applications</code>, and launches the app.</p>
+            <div class="code-box">
+              <code id="cmd-build">git clone https://github.com/badugisoft/antigravity-quota.git &amp;&amp; cd antigravity-quota &amp;&amp; ./scripts/build_app.sh</code>
+              <button type="button" class="copy-btn" data-copy-target="cmd-build" data-i18n="btn_copy">Copy</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="section">
+      <div class="container faq-container">
+        <div class="section-header">
+          <h2 data-i18n="sec_faq_title">Frequently Asked Questions</h2>
+        </div>
+
+        <div class="accordion">
+          <details>
+            <summary data-i18n="faq_1_q">macOS says "Antigravity Quota" cannot be opened because the developer cannot be verified</summary>
+            <div class="details-body">
+              <p data-i18n="faq_1_a">This open-source build uses ad-hoc code signing without a paid Apple Developer notarization certificate. Right-click Antigravity Quota.app in /Applications, select Open, and confirm—or run <code>xattr -cr "/Applications/Antigravity Quota.app"</code> in Terminal.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary data-i18n="faq_2_q">Why does the menu bar show "Waiting for Antigravity" or "Offline"?</summary>
+            <div class="details-body">
+              <p data-i18n="faq_2_a">Antigravity Quota reads quota directly from the running Google Antigravity language_server process. Make sure Google Antigravity is open locally—or enable Remote SSH under Settings &gt; Remote if you run it on another machine.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary data-i18n="faq_3_q">Why does a 100% full quota show "Unused" instead of a countdown?</summary>
+            <div class="details-body">
+              <p data-i18n="faq_3_a">Antigravity's 5-hour and weekly limits use a rolling window over consumed quota. When 100% of a bucket is intact, the server shifts the candidate reset timestamp forward on each request, so Antigravity Quota displays "Unused" until consumption begins.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary data-i18n="faq_4_q">Does it collect telemetry or require API keys?</summary>
+            <div class="details-body">
+              <p data-i18n="faq_4_a">No. It runs 100% locally against 127.0.0.1 (or your configured SSH host), stores zero API keys or credentials, and sends zero telemetry or analytics.</p>
+            </div>
+          </details>
+
+          <details>
+            <summary data-i18n="faq_5_q">Can I monitor Antigravity running on another Mac?</summary>
+            <div class="details-body">
+              <p data-i18n="faq_5_a">Yes. Set up key-based SSH authentication (BatchMode=yes) to the target machine, then open Settings &gt; Remote, enable Remote SSH Query, enter your user@hostname or ~/.ssh/config alias, and click Test Connection.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p data-i18n="footer_crafted">Crafted with ❤️ by BadugiSoft &amp; Google Antigravity · MIT License</p>
+      <div class="footer-links">
+        <a href="https://github.com/badugisoft/antigravity-quota" target="_blank" rel="noopener noreferrer">Repository</a>
+        <a href="https://github.com/badugisoft/antigravity-quota/releases" target="_blank" rel="noopener noreferrer">Releases</a>
+        <a href="https://github.com/badugisoft/antigravity-quota/issues" target="_blank" rel="noopener noreferrer">Issues</a>
+        <a href="https://github.com/badugisoft/antigravity-quota/blob/main/SECURITY.md" target="_blank" rel="noopener noreferrer">Security</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="i18n.js"></script>
+</body>
+</html>

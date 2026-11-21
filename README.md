@@ -30,6 +30,7 @@
 
 <p align="center">
   <a href="https://github.com/badugisoft/antigravity-quota/releases/latest"><strong>⬇️ Download Latest DMG</strong></a> ·
+  <a href="https://badugisoft.github.io/antigravity-quota/"><strong>🌐 Website</strong></a> ·
   <a href="#screenshots">Screenshots</a> ·
   <a href="#features">Features</a> ·
   <a href="#installation--building">Installation</a> ·
@@ -275,13 +276,18 @@ antigravity-quota/
 │   ├── PULL_REQUEST_TEMPLATE.md                 # Pull request checklist template
 │   ├── release.yml                              # Release notes category rules
 │   └── workflows/
-│       └── release.yml                          # GitHub Actions CI/CD release workflow
+│       ├── release.yml                          # GitHub Actions CI/CD release workflow
+│       └── pages.yml                            # GitHub Pages deployment workflow
 ├── Package.swift                                # SwiftPM multi-target configuration
 ├── LICENSE                                      # MIT License
 ├── README.md                                    # English documentation
 ├── CONTRIBUTING.md                              # Contributor guide & conventions
 ├── SECURITY.md                                  # Privacy & security policy
 ├── AGENTS.md                                    # Guidelines for AI agents & contributors
+├── site/                                        # Promotional GitHub Pages website (7 languages)
+│   ├── index.html                               # Landing page structure
+│   ├── styles.css                               # Light/dark adaptive macOS styling
+│   └── i18n.js                                  # 7-language translations & switcher
 ├── docs/                                        # Localized documentation
 │   ├── README.ko.md                             # 한국어 (Korean)
 │   ├── README.zh.md                             # 简体中文 (Simplified Chinese)
