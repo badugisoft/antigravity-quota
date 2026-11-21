@@ -12,6 +12,7 @@ This document provides essential architecture context, operating rules, user ins
 2. **Communication & Internationalization**:
    - Communicate in the **user's language of choice** (mirror the language used in prompts, e.g., English, Korean, etc.).
    - Preserve application multi-language support (7 languages: `EN`, `KO`, `ZH`, `JA`, `DE`, `FR`, `ES`) in code, UI, and localization dictionaries.
+   - Keep multi-language documentation synchronized across root `README.md` (English) and `docs/README.<lang>.md` (`ko`, `zh`, `ja`, `de`, `fr`, `es`), preserving the language switcher links at the top of each document.
 3. **No External Dependencies**:
    - The project strictly uses pure Swift / SwiftUI / AppKit / WidgetKit. Do not introduce third-party CocoaPods, Carthage, or SPM packages.
 4. **Local Task Completion & Installation**:
@@ -21,9 +22,12 @@ This document provides essential architecture context, operating rules, user ins
 
 ## 2. Architecture Overview
 
-The repository is structured into three distinct Swift targets:
+The repository is structured into three distinct Swift targets plus localized documentation:
 
 ```
+README.md                      # Root English documentation
+docs/README.<lang>.md          # Localized documentation (ko, zh, ja, de, fr, es)
+assets/                        # App icon & generated documentation screenshots
 Sources/
 ├── AntigravityQuotaCore/      # Modular core library target
 │   ├── Models/               # Quota models, envelope parsing, snapshot structs

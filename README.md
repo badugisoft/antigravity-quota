@@ -17,6 +17,16 @@
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License" />
 </p>
 
+<p align="center">
+  <strong>English</strong> ·
+  <a href="docs/README.ko.md">한국어</a> ·
+  <a href="docs/README.zh.md">简体中文</a> ·
+  <a href="docs/README.ja.md">日本語</a> ·
+  <a href="docs/README.de.md">Deutsch</a> ·
+  <a href="docs/README.fr.md">Français</a> ·
+  <a href="docs/README.es.md">Español</a>
+</p>
+
 ---
 
 > [!NOTE]
@@ -31,7 +41,7 @@
 <p align="center">
   <img src="assets/menubar_summary.png" alt="Status Bar Summary" />
   <br>
-  <em>Status Bar Quota Summary</em>
+  <em>Status Bar Circular Gauge & Quota Summary</em>
 </p>
 
 <p align="center">
@@ -55,8 +65,11 @@
 ## Features
 
 - **Real-Time Quota Monitoring**:
-  - Dynamically discovers and displays all quota groups and buckets returned by Antigravity (e.g., **Gemini Models**, **Claude / GPT**, **Gemini 4 Argon**, and future model groups).
+  - Dynamically discovers and displays all quota groups and buckets returned by Antigravity (e.g., **Gemini Models**, **Claude and GPT models**, **Gemini 4 Argon**, and future model groups).
   - Monitors both **5-Hour rolling limits** and **Weekly quota limits** across all active groups.
+- **Dynamic Menu Bar Circular Gauge Icon**:
+  - Renders the Antigravity emblem encircled by a live circular gauge ring reflecting the remaining quota of your selected target bucket (and switches to a dashed ring when offline).
+  - Supports **Icon & Quota Percentages** (with dynamic group abbreviations such as `G:75% · C:100% · A:85%`) or **Icon Only** display modes, plus configurable gauge target selection in **Settings > General**.
 - **macOS Desktop & Notification Center Widgets (WidgetKit)**:
   - **Small Widget (`systemSmall` / 1x1)**: Minimalist overview dynamically displaying all active model groups with progress bars, remaining %, online indicator, and shortest reset countdown.
   - **Medium Widget (`systemMedium` / 1x2)**: Two-column card displaying primary model groups side-by-side plus a compact bottom row for additional groups (such as Gemini 4 Argon), with countdown clocks and live status badge.
@@ -64,32 +77,34 @@
   - Real-time synchronization powered by `QuotaDataStore` and instant `WidgetCenter.reloadAllTimelines()` triggers whenever quota updates.
   - Fully supports macOS Dark Mode and all 7 localized languages.
 - **Live Countdown Clocks**:
-  - 1-second interval live countdown clocks showing exact time until the next quota replenishment (e.g., `4h 52m left`, `1d 20h left`).
-  - **100% Full Quota Suppression**: When a quota is 100% full and unused, rolling window countdowns are cleanly paused with an "Unused" (`미사용`) status rather than showing artificial rolling expiration timers.
+  - 1-second interval live countdown clocks showing exact time until the next quota replenishment (e.g., `3h 2m left`, `1d 19h left`).
+  - **100% Full Quota Suppression**: When a quota is 100% full and unused, rolling window countdowns are cleanly suppressed with an `"Unused"` status rather than showing artificial rolling expiration timers.
+- **Quota Refill Notifications**:
+  - Pre-schedules native macOS notifications (`UNUserNotificationCenter`) to alert you as soon as a depleted 5-hour or weekly quota bucket refills to 100%.
+  - Configure master toggle, separate **5-Hour** and **Weekly** alert toggles, system permission status/request controls, and **Send Test Notification** in **Settings > Notifications**.
 - **Adaptive Smart Polling**:
-  - **15-Second AI Burst Polling**: When AI activity (token generation, tool calling) causes quota to decrease, polling automatically accelerates to 15s for 3 minutes to provide real-time updates while you work (even if Antigravity is in the background).
+  - **15-Second AI Burst Polling**: When AI activity (token generation, tool calling) causes quota to decrease, polling automatically accelerates to 15s for a 3-minute cooldown window to provide real-time updates while you work (even when Antigravity is in the background).
   - **60-Second Idle Polling**: When no AI quota consumption occurs, polling automatically steps down to 60s to conserve battery and CPU.
   - **Instant Focus Refresh**: Switching to the Antigravity window triggers an immediate sync to catch new changes on demand.
-  - **Automatic Pause**: Polling gracefully pauses when Antigravity is quit or offline (`⏸️`), resuming instantly when re-launched.
+  - **Automatic Pause**: Polling gracefully shows paused status (`⏸`) when Antigravity is quit or offline, resuming instantly when re-launched.
 - **Remote SSH Fallback (Multi-Machine Sync)**:
   - When working across multiple Macs where Antigravity is not actively running on the local machine, Antigravity Quota can seamlessly query your remote machine via SSH.
   - Fully configurable in **Settings > Remote**: enable toggle, target SSH host (supports `user@hostname` or `~/.ssh/config` aliases), configurable polling interval (30s, 1m, 2m, 5m), and built-in connection testing.
-  - Executes direct remote RPC queries with zero lingering tunnel daemons, no external dependencies, and no file synchronization overhead.
-- **Compact & Standard View Modes**:
+  - Executes direct one-shot remote RPC queries via `/usr/bin/ssh` with zero lingering tunnel daemons, no external dependencies, and no file synchronization overhead.
+- **Compact & Standard View Modes & Preferences**:
   - **Standard Mode**: Detailed cards with visual progress gradients, percentages, and scheduled reset times.
   - **Compact Mode**: Ultra-slim, minimal view designed for zero scrolling and minimal screen real estate.
-  - Seamlessly switch anytime with a single click or keyboard-accessible toggle (persisted across launches).
+  - **Native Settings Window**: Access **General** (including **Launch at Login** via `SMAppService`), **Remote**, and **Notifications** settings directly from the gear icon in the popover header.
 - **Multi-Language Support (7 Languages)**:
   - Supports **English**, **한국어 (Korean)**, **简体中文 (Simplified Chinese)**, **日本語 (Japanese)**, **Deutsch (German)**, **Français (French)**, and **Español (Spanish)**.
   - Automatically matches your macOS system language preference upon first launch.
-  - 1-click dropdown menu to switch languages on the fly via the popover header.
-  - All text, countdown timers, scheduled replenishment times, and "Last updated" timestamps are localized to the active language's locale.
+  - 1-click dropdown menu in the popover header or language picker in Settings to switch languages on the fly.
+  - All text, countdown timers, scheduled replenishment times, notifications, and timestamps are localized to the active language's locale.
 - **Native macOS Experience**:
   - Built with 100% Swift & SwiftUI with AppKit integration.
   - Menu-bar-only daemon (`LSUIElement = true`) with zero Dock clutter.
   - Apple Human Interface Guidelines-compliant macOS squircle icon.
   - Dynamic popover positioning ensuring clean alignment directly beneath the status bar.
-  - Pixel-perfect top/bottom padding and active visual effect vibrancy consistency across standard and compact view modes.
   - Zero external third-party dependencies—pure Swift Package Manager.
 
 ---
@@ -105,7 +120,7 @@ Antigravity runs an internal language server daemon (`language_server`) listenin
 3. **Connect-RPC Protocol**:
    Sends HTTP/HTTPS POST requests to `127.0.0.1:<port>/exa.language_server_pb.LanguageServerService/RetrieveUserQuotaSummary` with authentication header `x-codeium-csrf-token`.
 4. **Shared Data Store & Widget Sync**:
-   Writes the latest quota snapshot to the shared suite container and calls `WidgetCenter.shared.reloadAllTimelines()` so widgets reflect fresh numbers instantly.
+   Writes the latest quota snapshot to `~/Library/Application Support/AntigravityQuota/shared_quota.json` via `QuotaDataStore` and calls `WidgetCenter.shared.reloadAllTimelines()` so sandboxed widgets reflect fresh numbers instantly without TCC privacy prompts.
 5. **Reactive Presentation**:
    Parses `remainingFraction` and `resetTime` into strongly typed Swift models and renders them seamlessly via SwiftUI, `NSStatusItem`, and WidgetKit.
 
@@ -113,7 +128,7 @@ Antigravity runs an internal language server daemon (`language_server`) listenin
 
 ## Adding Widgets to macOS
 
-1. Build and install the app to `/Applications` using `./scripts/build_app.sh`.
+1. Install **Antigravity Quota.app** into `/Applications` (via DMG or `./scripts/build_app.sh`).
 2. Right-click on your macOS desktop and choose **Edit Widgets...** (or open **Notification Center** and click **Edit Widgets** at the bottom).
 3. Search for **Antigravity Quota** in the widget gallery.
 4. Choose either the **Small (1x1)** or **Medium (1x2)** widget and drag it onto your desktop or Notification Center.
@@ -124,7 +139,7 @@ Antigravity runs an internal language server daemon (`language_server`) listenin
 
 - **macOS**: 13.0 (Ventura) or higher.
 - **Hardware**: Apple Silicon (M1/M2/M3/M4) or Intel Mac.
-- **Antigravity**: Google Antigravity installed.
+- **Antigravity**: Google Antigravity installed (locally or on a reachable SSH host).
 - **Development Tool**: Xcode 15.0+ or Swift 5.9+ toolchain (only if compiling from source).
 
 ---
@@ -160,11 +175,11 @@ The script will:
 1. Compile all targets in `Release` mode (`swift build -c release`).
 2. Package the main app (`Antigravity Quota.app`) and embed the WidgetKit extension (`Contents/PlugIns/AntigravityQuotaWidget.appex`).
 3. Embed high-resolution icons (`AppIcon.icns`) and configure `Info.plist` with `LSUIElement=true`.
-4. Ad-hoc codesign both the extension and the main application bundle.
+4. Ad-hoc codesign both the extension and the main application bundle (inside-out signing).
 5. Install it directly into `/Applications/Antigravity Quota.app`.
 6. Launch the menu bar app automatically.
 
-### 2. Manual Build with SwiftPM
+### 3. Manual Build with SwiftPM
 
 ```bash
 swift build -c release
@@ -176,7 +191,7 @@ The executables will be generated at `.build/release/AntigravityQuota` and `.bui
 
 ## Running at Login (Optional)
 
-To have Antigravity Quota start automatically when your Mac boots:
+You can enable **Launch at Login** directly inside the app via **Settings > General > Launch at Login**, or configure it manually in macOS:
 
 1. Open **System Settings** on your Mac.
 2. Navigate to **General** > **Login Items**.
@@ -191,61 +206,82 @@ To have Antigravity Quota start automatically when your Mac boots:
 antigravity-quota/
 ├── .github/
 │   └── workflows/
-│       └── release.yml                       # GitHub Actions CI/CD release workflow
-├── Package.swift                             # SwiftPM multi-target configuration
-├── LICENSE                                   # MIT License
-├── README.md                                 # English documentation
-├── AGENTS.md                                 # Guidelines for AI agents & contributors
-├── assets/                                   # Documentation screenshots and preview assets
-│   ├── menubar_summary.png                   # Status bar snapshot
-│   ├── popover_standard.png                  # Standard mode popover
-│   ├── popover_compact.png                   # Compact mode popover
-│   ├── widget_small.png                      # Small 1x1 macOS widget
-│   ├── widget_medium.png                     # Medium 1x2 macOS widget
-│   └── app_icon.png                          # 512x512 app icon
+│       └── release.yml                          # GitHub Actions CI/CD release workflow
+├── Package.swift                                # SwiftPM multi-target configuration
+├── LICENSE                                      # MIT License
+├── README.md                                    # English documentation
+├── AGENTS.md                                    # Guidelines for AI agents & contributors
+├── docs/                                        # Localized documentation
+│   ├── README.ko.md                             # 한국어 (Korean)
+│   ├── README.zh.md                             # 简体中文 (Simplified Chinese)
+│   ├── README.ja.md                             # 日本語 (Japanese)
+│   ├── README.de.md                             # Deutsch (German)
+│   ├── README.fr.md                             # Français (French)
+│   └── README.es.md                             # Español (Spanish)
+├── assets/                                      # Documentation screenshots and preview assets
+│   ├── menubar_summary.png                      # Status bar gauge & summary snapshot
+│   ├── popover_standard.png                     # Standard mode popover
+│   ├── popover_compact.png                      # Compact mode popover
+│   ├── widget_small.png                         # Small 1x1 macOS widget
+│   ├── widget_medium.png                        # Medium 1x2 macOS widget
+│   └── app_icon.png                             # 512x512 app icon
 ├── scripts/
-│   ├── build_app.sh                          # App & WidgetKit extension build script
-│   ├── package_release.sh                    # Automated .dmg and .zip release packager
-│   └── entitlements/                         # macOS App Sandbox & group entitlements
-│       ├── app.entitlements                  # Host app entitlements
-│       └── widget.entitlements               # Sandboxed widget extension entitlements
+│   ├── build_app.sh                             # App & WidgetKit extension build script
+│   ├── package_release.sh                       # Automated .dmg and .zip release packager
+│   └── entitlements/                            # macOS App Sandbox & group entitlements
+│       ├── app.entitlements                     # Host app entitlements
+│       └── widget.entitlements                  # Sandboxed widget extension entitlements
 ├── Sources/
-│   ├── AntigravityQuotaCore/                 # Shared core library
+│   ├── AntigravityQuotaCore/                    # Shared core library
 │   │   ├── Models/
-│   │   │   ├── QuotaModel.swift              # Quota data models & time formatting
-│   │   │   └── QuotaSnapshot.swift           # Snapshot representation for widgets
+│   │   │   ├── QuotaModel.swift                 # Quota data models & time formatting
+│   │   │   └── QuotaSnapshot.swift              # Snapshot representation for widgets
 │   │   ├── Services/
-│   │   │   ├── QuotaDataStore.swift          # Shared Suite & file synchronization
-│   │   │   ├── LocalizationManager.swift     # Multi-language manager & dispatcher
-│   │   │   └── Localization/                 # 7 supported language dictionaries
+│   │   │   ├── AppSettings.swift                # Persistent preferences & Launch at Login
+│   │   │   ├── QuotaDataStore.swift             # Shared App Support JSON store & WidgetCenter sync
+│   │   │   ├── NotificationManager.swift        # Scheduled & immediate refill notifications
+│   │   │   ├── LocalizationManager.swift        # Multi-language manager & dispatcher
+│   │   │   └── Localization/                    # 7 supported language dictionaries
+│   │   │       ├── LocalizedStrings+EN.swift
+│   │   │       ├── LocalizedStrings+KO.swift
+│   │   │       ├── LocalizedStrings+ZH.swift
+│   │   │       ├── LocalizedStrings+JA.swift
+│   │   │       ├── LocalizedStrings+DE.swift
+│   │   │       ├── LocalizedStrings+FR.swift
+│   │   │       └── LocalizedStrings+ES.swift
 │   │   └── Views/
-│   │       ├── SmallQuotaWidgetView.swift    # Small (1x1) widget layout
-│   │       ├── MediumQuotaWidgetView.swift   # Medium (1x2) widget layout
-│   │       └── WidgetBackgroundModifier.swift# Cross-version widget background
-│   ├── AntigravityQuota/                     # Menu bar application
-│   │   ├── main.swift                        # App entrypoint
+│   │       ├── SmallQuotaWidgetView.swift       # Small (1x1) widget layout
+│   │       ├── MediumQuotaWidgetView.swift      # Medium (1x2) widget layout
+│   │       └── WidgetBackgroundModifier.swift   # Cross-version widget background
+│   ├── AntigravityQuota/                        # Menu bar application
+│   │   ├── main.swift                           # App entrypoint
 │   │   ├── App/
-│   │   │   └── AppDelegate.swift             # NSStatusItem & NSPopover lifecycle
+│   │   │   └── AppDelegate.swift                # NSStatusItem & NSPopover lifecycle
 │   │   ├── Services/
-│   │   │   ├── LanguageServerDiscovery.swift # Process PID, CSRF, & port discovery
-│   │   │   └── QuotaService.swift            # Connect-RPC client
+│   │   │   ├── LanguageServerDiscovery.swift    # Process PID, CSRF, & port discovery
+│   │   │   ├── MenuBarIconRenderer.swift        # Dynamic circular gauge menu bar icon
+│   │   │   ├── QuotaService.swift               # Connect-RPC client & SSH fallback
+│   │   │   └── RemoteSSHQuotaService.swift      # Remote SSH one-shot quota query
 │   │   ├── ViewModels/
-│   │   │   └── QuotaViewModel.swift          # Main ViewModel & adaptive timers
+│   │   │   └── QuotaViewModel.swift             # Main ViewModel & adaptive timers
 │   │   ├── Views/
-│   │   │   ├── MenuBarPopoverView.swift      # Popover root view & header controls
-│   │   │   ├── QuotaGroupCardView.swift      # Standard mode card
-│   │   │   ├── QuotaBucketRowView.swift      # Standard mode bucket row
-│   │   │   ├── QuotaGroupCompactCardView.swift # Compact mode card
-│   │   │   └── QuotaBucketCompactRowView.swift # Compact mode bucket row
+│   │   │   ├── MenuBarPopoverView.swift         # Popover root view & header controls
+│   │   │   ├── QuotaGroupCardView.swift         # Standard mode card
+│   │   │   ├── QuotaBucketRowView.swift         # Standard mode bucket row
+│   │   │   ├── QuotaGroupCompactCardView.swift  # Compact mode card
+│   │   │   ├── QuotaBucketCompactRowView.swift  # Compact mode bucket row
+│   │   │   └── Settings/
+│   │   │       ├── SettingsView.swift           # General, Remote & Notifications tabs
+│   │   │       └── SettingsWindowController.swift # Settings window lifecycle
 │   │   └── Resources/
-│   │       └── AppIcon.icns                  # macOS Big Sur+ HIG squircle icon
-│   └── AntigravityQuotaWidget/               # WidgetKit extension bundle
-│       ├── AntigravityQuotaWidgetBundle.swift# @main WidgetBundle definition
-│       └── QuotaTimelineProvider.swift       # WidgetKit TimelineProvider
+│   │       └── AppIcon.icns                     # macOS Big Sur+ HIG squircle icon
+│   └── AntigravityQuotaWidget/                  # WidgetKit extension bundle
+│       ├── AntigravityQuotaWidgetBundle.swift   # @main WidgetBundle definition
+│       └── QuotaTimelineProvider.swift          # WidgetKit TimelineProvider
 └── Tests/
     └── AntigravityQuotaTests/
-        ├── QuotaModelTests.swift             # Models, localization & widget rendering tests
-        └── QuotaServiceIntegrationTests.swift# Live RPC discovery integration test
+        ├── QuotaModelTests.swift                # Models, localization & widget rendering tests
+        └── QuotaServiceIntegrationTests.swift   # Live RPC discovery integration test
 ```
 
 ---

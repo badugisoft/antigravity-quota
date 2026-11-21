@@ -284,6 +284,11 @@ final class QuotaModelTests: XCTestCase {
         let app = NSApplication.shared
         app.setActivationPolicy(.accessory)
         
+        let originalLanguage = LocalizationManager.shared.currentLanguage
+        defer {
+            LocalizationManager.shared.currentLanguage = originalLanguage
+        }
+        
         let now = Date()
         let fakeNow = now
         let cal = Calendar.current
@@ -292,15 +297,21 @@ final class QuotaModelTests: XCTestCase {
         let gWeeklyReset = cal.date(byAdding: .minute, value: 2590, to: fakeNow)! // 1d 19h 10m
         let cFiveReset = cal.date(byAdding: .minute, value: 296, to: fakeNow)! // 4h 56m
         let cWeeklyReset = cal.date(byAdding: .minute, value: 7320, to: fakeNow)! // 5d 2h
+        let aWeeklyReset = cal.date(byAdding: .minute, value: 8400, to: fakeNow)! // 5d 20h
         
         let iso = ISO8601DateFormatter()
-        let gFive = QuotaBucket(bucketId: "5h", displayName: "5-Hour Reset", window: "5h", remainingFraction: 0.75, resetTime: iso.string(from: gFiveReset))
-        let gWeekly = QuotaBucket(bucketId: "weekly", displayName: "Weekly Reset", window: "weekly", remainingFraction: 0.70, resetTime: iso.string(from: gWeeklyReset))
+        let gFive = QuotaBucket(bucketId: "gemini-5h", displayName: "5-Hour Reset", window: "5h", remainingFraction: 0.75, resetTime: iso.string(from: gFiveReset))
+        let gWeekly = QuotaBucket(bucketId: "gemini-weekly", displayName: "Weekly Reset", window: "weekly", remainingFraction: 0.70, resetTime: iso.string(from: gWeeklyReset))
         let geminiGroup = QuotaGroup(displayName: "Gemini Models", description: "Gemini Flash, Gemini Pro", buckets: [gFive, gWeekly])
         
-        let cFive = QuotaBucket(bucketId: "5h", displayName: "5-Hour Reset", window: "5h", remainingFraction: 1.0, resetTime: iso.string(from: cFiveReset))
-        let cWeekly = QuotaBucket(bucketId: "weekly", displayName: "Weekly Reset", window: "weekly", remainingFraction: 0.33, resetTime: iso.string(from: cWeeklyReset))
+        let cFive = QuotaBucket(bucketId: "3p-5h", displayName: "5-Hour Reset", window: "5h", remainingFraction: 1.0, resetTime: iso.string(from: cFiveReset))
+        let cWeekly = QuotaBucket(bucketId: "3p-weekly", displayName: "Weekly Reset", window: "weekly", remainingFraction: 0.33, resetTime: iso.string(from: cWeeklyReset))
         let claudeGroup = QuotaGroup(displayName: "Claude and GPT models", description: "Claude Opus, Claude Sonnet, GPT-OSS", buckets: [cFive, cWeekly])
+        
+        let aWeekly = QuotaBucket(bucketId: "gemini-argon-wtu-weekly", displayName: "Weekly Reset", window: "weekly", remainingFraction: 0.85, resetTime: iso.string(from: aWeeklyReset))
+        let argonGroup = QuotaGroup(displayName: "Gemini 4 Argon", description: "Gemini 4 Argon", buckets: [aWeekly])
+        
+        let mockGroups = [geminiGroup, claudeGroup, argonGroup]
         
         final class MockService: QuotaServiceProtocol {
             let groups: [QuotaGroup]
@@ -310,11 +321,14 @@ final class QuotaModelTests: XCTestCase {
             }
         }
         
-        let mockService = MockService(groups: [geminiGroup, claudeGroup])
+        let mockService = MockService(groups: mockGroups)
         let vm = QuotaViewModel(service: mockService)
-        vm.groups = [geminiGroup, claudeGroup]
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.15))
+        
+        vm.groups = mockGroups
         vm.isServerOnline = true
         vm.isAntigravityActive = true
+        vm.isRemoteConnection = false
         vm.currentNow = fakeNow
         vm.lastUpdated = fakeNow
         vm.isLoading = false
@@ -322,8 +336,8 @@ final class QuotaModelTests: XCTestCase {
         
         let assetsDir = URL(fileURLWithPath: "/Users/badugiss/work/badugisoft/antigravity-quota/assets")
         
-        // 1. Render Dark Menu Bar Summary
-        let menuBarText = "✦ G:75% · C:100%"
+        // 1. Render Dark Menu Bar Summary (Dynamic Gauge Icon + 3-Group Summary)
+        let menuBarText = "G:75% · C:100% · A:85%"
         let textFont = NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .medium)
         let textAttributes: [NSAttributedString.Key: Any] = [
             .font: textFont,
@@ -331,13 +345,24 @@ final class QuotaModelTests: XCTestCase {
         ]
         let attrString = NSAttributedString(string: menuBarText, attributes: textAttributes)
         let textSize = attrString.size()
-        let barRect = NSRect(x: 0, y: 0, width: ceil(textSize.width) + 24, height: 26)
+        let iconSize = NSSize(width: 18, height: 18)
+        let spacing: CGFloat = 5
+        let barRect = NSRect(x: 0, y: 0, width: ceil(iconSize.width + spacing + textSize.width) + 24, height: 26)
+        
+        let rawIcon = MenuBarIconRenderer.shared.renderIcon(remainingFraction: 0.75, isOnline: true)
+        let tintedIcon = NSImage(size: iconSize)
+        tintedIcon.lockFocus()
+        rawIcon.draw(in: NSRect(origin: .zero, size: iconSize))
+        NSColor.white.setFill()
+        NSRect(origin: .zero, size: iconSize).fill(using: .sourceAtop)
+        tintedIcon.unlockFocus()
         
         let barImage = NSImage(size: barRect.size)
         barImage.lockFocus()
         NSColor.black.setFill()
         barRect.fill()
-        attrString.draw(at: NSPoint(x: 12, y: (barRect.height - textSize.height) / 2))
+        tintedIcon.draw(in: NSRect(x: 12, y: (barRect.height - iconSize.height) / 2, width: iconSize.width, height: iconSize.height))
+        attrString.draw(at: NSPoint(x: 12 + iconSize.width + spacing, y: (barRect.height - textSize.height) / 2))
         barImage.unlockFocus()
         
         if let tiff = barImage.tiffRepresentation, let rep = NSBitmapImageRep(data: tiff), let png = rep.representation(using: .png, properties: [:]) {
@@ -365,16 +390,22 @@ final class QuotaModelTests: XCTestCase {
             vm.isCompactMode = isCompact
             vm.isServerOnline = true
             vm.isAntigravityActive = true
+            vm.isRemoteConnection = false
             vm.isLoading = false
             
+            let hostingController = NSHostingController(rootView: MenuBarPopoverView(viewModel: vm))
+            let fittingSize = hostingController.sizeThatFits(in: NSSize(width: 340, height: 1000))
+            
             let popover = NSPopover()
-            popover.contentSize = NSSize(width: 340, height: isCompact ? 275 : 470)
+            popover.contentSize = NSSize(width: 340, height: fittingSize.height)
             popover.behavior = .transient
-            popover.contentViewController = NSHostingController(rootView: MenuBarPopoverView(viewModel: vm))
+            popover.appearance = NSAppearance(named: .darkAqua)
+            popover.contentViewController = hostingController
             
             popover.show(relativeTo: anchorView.bounds, of: anchorView, preferredEdge: .minY)
             
             if let win = popover.contentViewController?.view.window {
+                win.appearance = NSAppearance(named: .darkAqua)
                 win.makeKeyAndOrderFront(nil)
                 if let effectView = win.contentView?.superview as? NSVisualEffectView {
                     effectView.state = .active
@@ -405,7 +436,7 @@ final class QuotaModelTests: XCTestCase {
         let snapshot = QuotaSnapshot(
             timestamp: fakeNow,
             isOnline: true,
-            groups: [geminiGroup, claudeGroup],
+            groups: mockGroups,
             description: "Antigravity Pro Quota"
         )
         
