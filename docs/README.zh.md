@@ -10,10 +10,11 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/badugisoft/antigravity-quota/releases"><img src="https://img.shields.io/github/v/release/badugisoft/antigravity-quota?style=flat-square&color=blue" alt="Latest Release" /></a>
+  <a href="https://github.com/badugisoft/antigravity-quota/releases"><img src="https://img.shields.io/github/downloads/badugisoft/antigravity-quota/total?style=flat-square&color=brightgreen" alt="Total Downloads" /></a>
   <img src="https://img.shields.io/badge/macOS-13.0%2B-black?style=flat-square&logo=apple" alt="macOS 13+" />
   <img src="https://img.shields.io/badge/Swift-5.9%2B-orange?style=flat-square&logo=swift" alt="Swift 5.9+" />
   <img src="https://img.shields.io/badge/WidgetKit-Ready-purple?style=flat-square&logo=apple" alt="WidgetKit" />
-  <img src="https://img.shields.io/badge/100%25-Built%20with%20Antigravity-blue?style=flat-square" alt="100% Built with Antigravity" />
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License" />
 </p>
 
@@ -27,12 +28,14 @@
   <a href="README.es.md">Español</a>
 </p>
 
----
-
-> [!NOTE]
-> **🤖 100% Built with Google Antigravity**
->
-> 本应用的全部内容——包括本地 RPC 发现、架构设计、SwiftUI 视图、WidgetKit 扩展、自适应轮询逻辑、多语言本地化、图标设计及构建脚本——均**通过与 Google Antigravity 自主结对编程 100% 设计、实现并验证**。
+<p align="center">
+  <a href="https://github.com/badugisoft/antigravity-quota/releases/latest"><strong>⬇️ 下载最新 DMG</strong></a> ·
+  <a href="#界面截图">界面截图</a> ·
+  <a href="#主要功能">主要功能</a> ·
+  <a href="#安装与构建">安装</a> ·
+  <a href="#常见问题与故障排查">常见问题</a> ·
+  <a href="#参与贡献">参与贡献</a>
+</p>
 
 ---
 
@@ -59,6 +62,11 @@
   <br>
   <em>macOS 小组件：小号 1x1（左）&nbsp;|&nbsp; 中号 1x2（右）</em>
 </p>
+
+> [!NOTE]
+> **🤖 100% Built with Google Antigravity**
+>
+> 本应用的全部内容——包括本地 RPC 发现、架构设计、SwiftUI 视图、WidgetKit 扩展、自适应轮询逻辑、多语言本地化、图标设计及构建脚本——均**通过与 Google Antigravity 自主结对编程 100% 设计、实现并验证**。
 
 ---
 
@@ -100,6 +108,8 @@
   - 首次启动时自动匹配 macOS 系统语言设置。
   - 可在弹窗顶部下拉菜单或设置窗口中一键实时切换语言。
   - 所有界面文本、倒计时、重置时间、通知内容和更新时间均依据当前语言本地化显示。
+- **100% 本地运行与隐私安全**：
+  - 仅查询本地 `127.0.0.1` 的 Antigravity 语言服务器（或用户手动配置的 SSH 主机），无任何遥测统计、无第三方服务器交互，也不存储 API 密钥。详情请参阅 [SECURITY.md](../SECURITY.md)。
 - **原生 macOS 体验**：
   - 100% 使用 Swift、SwiftUI、AppKit 与 WidgetKit 构建。
   - 纯菜单栏后台应用（`LSUIElement = true`），不占用程序坞图标位置。
@@ -199,16 +209,77 @@ swift build -c release
 
 ---
 
+## 常见问题与故障排查
+
+<details>
+<summary><strong>macOS 提示“无法打开 Antigravity Quota，因为无法验证开发者”</strong></summary>
+
+由于本开源版本采用 ad-hoc 签名，未附带付费 Apple Developer 公证证书，macOS Gatekeeper 默认会拦截首次运行。请在 `/Applications` 中 **右键点击** `Antigravity Quota.app`，选择 **打开** 并再次确认，或在终端中运行：
+
+```bash
+xattr -cr "/Applications/Antigravity Quota.app"
+```
+
+</details>
+
+<details>
+<summary><strong>菜单栏一直显示“等待 Antigravity 连接”或“离线”</strong></summary>
+
+Antigravity Quota 直接从运行中的 Google Antigravity `language_server` 进程获取配额。请确认本地已启动 Google Antigravity；如果您在另一台 Mac 或 Linux 主机上运行 Antigravity，请在 **设置 > 远程** 中启用远程 SSH 查询。
+
+</details>
+
+<details>
+<summary><strong>为什么剩余 100% 的配额显示“未使用”而不是倒计时？</strong></summary>
+
+Antigravity 的 5 小时与每周限额采用基于已消耗额度的滚动窗口。当某配额桶保持 100% 未消耗时，服务端会在每次请求时将预计重置时间顺延（`当前时间 + 5小时`），因此应用会隐藏虚假倒计时，直到开始消耗额度前都简洁显示 `"未使用"`。
+
+</details>
+
+<details>
+<summary><strong>是否收集遥测数据或需要填写 API 密钥？</strong></summary>
+
+不需要。Antigravity Quota 100% 在本地访问 `127.0.0.1`（或您配置的 SSH 主机），不保存任何 API 密钥或账号密码，也不发送任何遥测或分析数据。完整隐私架构见 [SECURITY.md](../SECURITY.md)。
+
+</details>
+
+<details>
+<summary><strong>可以监控另一台 Mac 上运行的 Antigravity 吗？</strong></summary>
+
+可以。在目标机器上预先配置免密 SSH 密钥认证（`BatchMode=yes`），随后打开 **设置 > 远程**，勾选 **启用远程 SSH 配额查询**，填写 `user@hostname` 或 `~/.ssh/config` 别名并点击 **测试连接** 即可。
+
+</details>
+
+---
+
+## 参与贡献
+
+欢迎提交代码贡献、问题反馈与功能建议！
+
+- 阅读 [CONTRIBUTING.md](../CONTRIBUTING.md) 了解本地开发环境、纯 Swift 规范及多语言本地化要求。
+- 使用 [GitHub 问题模板](https://github.com/badugisoft/antigravity-quota/issues/new/choose) 报告 Bug 或提出改进建议。
+- 查阅 [SECURITY.md](../SECURITY.md) 了解隐私架构与漏洞报告方式。
+
+---
+
 ## 项目结构
 
 ```
 antigravity-quota/
 ├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.md                        # Bug 报告模板
+│   │   ├── feature_request.md                   # 功能请求模板
+│   │   └── config.yml                           # 问题选择器与发布链接
+│   ├── PULL_REQUEST_TEMPLATE.md                 # Pull Request 检查清单模板
+│   ├── release.yml                              # Release Notes 分类规则
 │   └── workflows/
 │       └── release.yml                          # GitHub Actions CI/CD 发布工作流
 ├── Package.swift                                # SwiftPM 多目标配置
 ├── LICENSE                                      # MIT 许可证
 ├── README.md                                    # 英文文档（根目录）
+├── CONTRIBUTING.md                              # 贡献指南与项目规范
+├── SECURITY.md                                  # 隐私与安全策略
 ├── AGENTS.md                                    # AI Agent 与贡献者指南
 ├── docs/                                        # 多语言本地化文档
 │   ├── README.ko.md                             # 한국어

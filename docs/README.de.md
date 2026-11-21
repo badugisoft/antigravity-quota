@@ -10,10 +10,11 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/badugisoft/antigravity-quota/releases"><img src="https://img.shields.io/github/v/release/badugisoft/antigravity-quota?style=flat-square&color=blue" alt="Latest Release" /></a>
+  <a href="https://github.com/badugisoft/antigravity-quota/releases"><img src="https://img.shields.io/github/downloads/badugisoft/antigravity-quota/total?style=flat-square&color=brightgreen" alt="Total Downloads" /></a>
   <img src="https://img.shields.io/badge/macOS-13.0%2B-black?style=flat-square&logo=apple" alt="macOS 13+" />
   <img src="https://img.shields.io/badge/Swift-5.9%2B-orange?style=flat-square&logo=swift" alt="Swift 5.9+" />
   <img src="https://img.shields.io/badge/WidgetKit-Ready-purple?style=flat-square&logo=apple" alt="WidgetKit" />
-  <img src="https://img.shields.io/badge/100%25-Built%20with%20Antigravity-blue?style=flat-square" alt="100% Built with Antigravity" />
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License" />
 </p>
 
@@ -27,12 +28,14 @@
   <a href="README.es.md">Español</a>
 </p>
 
----
-
-> [!NOTE]
-> **🤖 100% Built with Google Antigravity**
->
-> Diese gesamte Anwendung – einschließlich lokaler RPC-Erkennung, Architektur, SwiftUI-Views, WidgetKit-Erweiterungen, adaptiver Abfragelogik, Mehrsprachigkeit, Icon-Design und Build-Skripten – wurde **zu 100 % im autonomen Pair-Programming mit Google Antigravity entworfen, implementiert und verifiziert**.
+<p align="center">
+  <a href="https://github.com/badugisoft/antigravity-quota/releases/latest"><strong>⬇️ Neuestes DMG herunterladen</strong></a> ·
+  <a href="#screenshots">Screenshots</a> ·
+  <a href="#funktionen">Funktionen</a> ·
+  <a href="#installation--build">Installation</a> ·
+  <a href="#faq--fehlerbehebung">FAQ</a> ·
+  <a href="#mitwirken">Mitwirken</a>
+</p>
 
 ---
 
@@ -59,6 +62,11 @@
   <br>
   <em>macOS Widgets: Klein 1x1 (links) &nbsp;|&nbsp; Mittel 1x2 (rechts)</em>
 </p>
+
+> [!NOTE]
+> **🤖 100% Built with Google Antigravity**
+>
+> Diese gesamte Anwendung – einschließlich lokaler RPC-Erkennung, Architektur, SwiftUI-Views, WidgetKit-Erweiterungen, adaptiver Abfragelogik, Mehrsprachigkeit, Icon-Design und Build-Skripten – wurde **zu 100 % im autonomen Pair-Programming mit Google Antigravity entworfen, implementiert und verifiziert**.
 
 ---
 
@@ -100,6 +108,8 @@
   - Übernimmt beim ersten Start automatisch Ihre macOS-Systemsprache.
   - Ein-Klick-Dropdown im Popover-Header oder Sprachauswahl in den Einstellungen.
   - Sämtliche Texte, Countdowns, Reset-Uhrzeiten, Mitteilungen und Zeitstempel werden gemäß der aktiven Sprache formatiert.
+- **100 % lokal & datenschutzfreundlich**:
+  - Fragt ausschließlich den lokalen `127.0.0.1`-Antigravity-Language-Server (oder Ihren explizit eingerichteten SSH-Host) ab – ganz ohne Telemetrie, Drittserver oder gespeicherte API-Keys. Details siehe [SECURITY.md](../SECURITY.md).
 - **Natives macOS-Erlebnis**:
   - Zu 100 % in Swift, SwiftUI, AppKit und WidgetKit entwickelt.
   - Reiner Menüleisten-Daemon (`LSUIElement = true`) ohne Dock-Symbol.
@@ -199,16 +209,77 @@ Aktivieren Sie **Bei der Anmeldung starten** direkt in der App unter **Einstellu
 
 ---
 
+## FAQ & Fehlerbehebung
+
+<details>
+<summary><strong>macOS meldet, dass "Antigravity Quota" nicht geöffnet werden kann, da der Entwickler nicht verifiziert ist</strong></summary>
+
+Da diese Open-Source-Version ohne kostenpflichtiges Apple-Developer-Notarisierungszertifikat Ad-hoc-signiert ist, blockiert macOS Gatekeeper standardmäßig den ersten Start. Klicken Sie mit der **rechten Maustaste** auf `Antigravity Quota.app` in `/Applications`, wählen Sie **Öffnen** und bestätigen Sie erneut mit **Öffnen**, oder führen Sie im Terminal aus:
+
+```bash
+xattr -cr "/Applications/Antigravity Quota.app"
+```
+
+</details>
+
+<details>
+<summary><strong>In der Menüleiste erscheint "Warten auf Antigravity" oder "Offline"</strong></summary>
+
+Antigravity Quota liest die Daten direkt aus dem laufenden Google Antigravity `language_server`-Prozess. Prüfen Sie, ob Google Antigravity lokal geöffnet ist – oder aktivieren Sie bei Nutzung auf einem anderen Mac/Linux-Rechner Remote SSH unter **Einstellungen > Remote**.
+
+</details>
+
+<details>
+<summary><strong>Warum zeigt ein zu 100 % volles Kontingent "Ungenutzt" statt eines Countdowns?</strong></summary>
+
+Die 5-Stunden- und Wochenlimits arbeiten mit einem rollierenden Zeitfenster über verbrauchte Kontingente. Solange 100 % ungenutzt sind, verschiebt der Server den möglichen Reset-Zeitpunkt bei jeder Abfrage nach vorn (`jetzt + 5 Std.`). Daher unterdrückt die App den künstlichen Timer und zeigt bis zur ersten Nutzung `"Ungenutzt"`.
+
+</details>
+
+<details>
+<summary><strong>Werden Telemetriedaten erfasst oder API-Keys benötigt?</strong></summary>
+
+Nein. Antigravity Quota läuft zu 100 % lokal gegen `127.0.0.1` (bzw. Ihren konfigurierten SSH-Host), speichert keinerlei API-Keys oder Zugangsdaten und sendet keinerlei Telemetrie- oder Analysedaten. Details siehe [SECURITY.md](../SECURITY.md).
+
+</details>
+
+<details>
+<summary><strong>Kann ich Antigravity auf einem anderen Mac überwachen?</strong></summary>
+
+Ja. Richten Sie auf dem Zielrechner passwortlose SSH-Schlüssel-Authentifizierung (`BatchMode=yes`) ein, öffnen Sie **Einstellungen > Remote**, aktivieren Sie **Remote-SSH-Kontingentabfrage aktivieren**, geben Sie `user@hostname` oder Ihren `~/.ssh/config`-Alias ein und klicken Sie auf **Verbindung testen**.
+
+</details>
+
+---
+
+## Mitwirken
+
+Beiträge, Fehlerberichte und Funktionswünsche sind herzlich willkommen!
+
+- In [CONTRIBUTING.md](../CONTRIBUTING.md) finden Sie Einrichtungshinweise, Pure-Swift-Regeln und Lokalisierungsvorgaben.
+- Fehler und Vorschläge können über die [GitHub Issue-Vorlagen](https://github.com/badugisoft/antigravity-quota/issues/new/choose) eingereicht werden.
+- Informationen zu Datenschutz und Sicherheitsmeldungen stehen in [SECURITY.md](../SECURITY.md).
+
+---
+
 ## Projektstruktur
 
 ```
 antigravity-quota/
 ├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.md                        # Bug-Report-Vorlage
+│   │   ├── feature_request.md                   # Feature-Request-Vorlage
+│   │   └── config.yml                           # Issue-Auswahl & Release-Links
+│   ├── PULL_REQUEST_TEMPLATE.md                 # Pull-Request-Checkliste
+│   ├── release.yml                              # Regeln für Release Notes
 │   └── workflows/
 │       └── release.yml                          # GitHub Actions CI/CD Release-Workflow
 ├── Package.swift                                # SwiftPM Multi-Target-Konfiguration
 ├── LICENSE                                      # MIT-Lizenz
 ├── README.md                                    # Englische Dokumentation (Root)
+├── CONTRIBUTING.md                              # Leitfaden für Mitwirkende
+├── SECURITY.md                                  # Datenschutz- & Sicherheitsrichtlinie
 ├── AGENTS.md                                    # Richtlinien für KI-Agenten & Mitwirkende
 ├── docs/                                        # Mehrsprachige Dokumentation
 │   ├── README.ko.md                             # 한국어

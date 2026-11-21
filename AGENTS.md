@@ -22,12 +22,17 @@ This document provides essential architecture context, operating rules, user ins
 
 ## 2. Architecture Overview
 
-The repository is structured into three distinct Swift targets plus localized documentation:
+The repository is structured into three distinct Swift targets plus localized documentation and community templates:
 
 ```
-README.md                      # Root English documentation
-docs/README.<lang>.md          # Localized documentation (ko, zh, ja, de, fr, es)
-assets/                        # App icon & generated documentation screenshots
+README.md                          # Root English documentation
+CONTRIBUTING.md                    # Contributor guidelines & development setup
+SECURITY.md                        # Privacy architecture & vulnerability reporting
+.github/
+├── ISSUE_TEMPLATE/                # Bug report, feature request & chooser config
+└── PULL_REQUEST_TEMPLATE.md       # PR review & test checklist
+docs/README.<lang>.md              # Localized documentation (ko, zh, ja, de, fr, es)
+assets/                            # App icon & generated documentation screenshots
 Sources/
 ├── AntigravityQuotaCore/      # Modular core library target
 │   ├── Models/               # Quota models, envelope parsing, snapshot structs

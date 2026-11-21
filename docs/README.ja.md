@@ -10,10 +10,11 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/badugisoft/antigravity-quota/releases"><img src="https://img.shields.io/github/v/release/badugisoft/antigravity-quota?style=flat-square&color=blue" alt="Latest Release" /></a>
+  <a href="https://github.com/badugisoft/antigravity-quota/releases"><img src="https://img.shields.io/github/downloads/badugisoft/antigravity-quota/total?style=flat-square&color=brightgreen" alt="Total Downloads" /></a>
   <img src="https://img.shields.io/badge/macOS-13.0%2B-black?style=flat-square&logo=apple" alt="macOS 13+" />
   <img src="https://img.shields.io/badge/Swift-5.9%2B-orange?style=flat-square&logo=swift" alt="Swift 5.9+" />
   <img src="https://img.shields.io/badge/WidgetKit-Ready-purple?style=flat-square&logo=apple" alt="WidgetKit" />
-  <img src="https://img.shields.io/badge/100%25-Built%20with%20Antigravity-blue?style=flat-square" alt="100% Built with Antigravity" />
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License" />
 </p>
 
@@ -27,12 +28,14 @@
   <a href="README.es.md">Español</a>
 </p>
 
----
-
-> [!NOTE]
-> **🤖 100% Built with Google Antigravity**
->
-> ローカル RPC 探索、アーキテクチャ設計、SwiftUI ビュー、WidgetKit 拡張、適応型ポーリングロジック、多言語ローカライズ、アイコンデザイン、ビルドスクリプトに至るまで、本アプリケーション全体が **Google Antigravity との自律的ペアプログラミングによって 100% 設計・実装・検証**されました。
+<p align="center">
+  <a href="https://github.com/badugisoft/antigravity-quota/releases/latest"><strong>⬇️ 最新 DMG をダウンロード</strong></a> ·
+  <a href="#スクリーンショット">スクリーンショット</a> ·
+  <a href="#主な機能">主な機能</a> ·
+  <a href="#インストールとビルド">インストール</a> ·
+  <a href="#よくある質問とトラブルシューティング">FAQ</a> ·
+  <a href="#コントリビュート">コントリビュート</a>
+</p>
 
 ---
 
@@ -59,6 +62,11 @@
   <br>
   <em>macOS ウィジェット：小 1x1（左）&nbsp;|&nbsp; 中 1x2（右）</em>
 </p>
+
+> [!NOTE]
+> **🤖 100% Built with Google Antigravity**
+>
+> ローカル RPC 探索、アーキテクチャ設計、SwiftUI ビュー、WidgetKit 拡張、適応型ポーリングロジック、多言語ローカライズ、アイコンデザイン、ビルドスクリプトに至るまで、本アプリケーション全体が **Google Antigravity との自律的ペアプログラミングによって 100% 設計・実装・検証**されました。
 
 ---
 
@@ -100,6 +108,8 @@
   - 初回起動時に macOS のシステム言語設定に合わせて自動選択されます。
   - ポップオーバーヘッダーのドロップダウンメニューや設定画面からワンクリックで言語を切り替えられます。
   - UI 文字列、カウントダウン、リセット予定時刻、通知、最終更新時刻がすべて選択言語のロケールで表示されます。
+- **100% ローカル動作＆プライバシー保護**:
+  - ローカルの `127.0.0.1` Antigravity 言語サーバー（または明示的に設定した SSH ホスト）のみへアクセスし、テレメトリ送信、外部サーバー通信、API キーの保存は一切行いません。詳細は [SECURITY.md](../SECURITY.md) をご覧ください。
 - **ネイティブ macOS エクスペリエンス**:
   - 100% Swift、SwiftUI、AppKit、WidgetKit で構築。
   - Dock に表示されないメニューバー専用常駐アプリ（`LSUIElement = true`）。
@@ -199,16 +209,77 @@ swift build -c release
 
 ---
 
+## よくある質問とトラブルシューティング
+
+<details>
+<summary><strong>macOS で「開発元を検証できないため開けません」と表示されます</strong></summary>
+
+このオープンソースリリースは有料の Apple Developer 公証証明書を使用せずアドホック署名されているため、初回起動時に macOS Gatekeeper によってブロックされる場合があります。`/Applications` 内の `Antigravity Quota.app` を **右クリック > 開く** から **開く** を選択するか、ターミナルで次を実行してください：
+
+```bash
+xattr -cr "/Applications/Antigravity Quota.app"
+```
+
+</details>
+
+<details>
+<summary><strong>メニューバーに「Antigravity の接続待機中」または「オフライン」と表示されます</strong></summary>
+
+Antigravity Quota は起動中の Google Antigravity `language_server` プロセスから直接クォータを取得します。ローカルで Google Antigravity が起動しているか確認するか、別の Mac／Linux マシンで動かしている場合は **設定 > リモート** でリモート SSH 照会を有効にしてください。
+
+</details>
+
+<details>
+<summary><strong>残量 100% のバケットにカウントダウンではなく「未使用」と表示されるのはなぜですか？</strong></summary>
+
+Antigravity の 5 時間・週間上限は消費分に対するローリングウィンドウ方式で動作しています。残量が 100% 未使用の状態では、リクエストごとにリセット予定時刻が現在時刻から 5 時間後へスライドするため、不自然なカウントダウンを抑止して実際に使用が開始されるまで `"未使用"` を表示します。
+
+</details>
+
+<details>
+<summary><strong>テレメトリの収集や API キーの設定は必要ですか？</strong></summary>
+
+いいえ。Antigravity Quota はローカルの `127.0.0.1`（または設定した SSH ホスト）に対して 100% ローカルで動作し、API キーや認証情報を保存せず、テレメトリや解析データも一切送信しません。プライバシー設計の詳細は [SECURITY.md](../SECURITY.md) をご覧ください。
+
+</details>
+
+<details>
+<summary><strong>別の Mac で動作している Antigravity を監視できますか？</strong></summary>
+
+はい。対象マシンへパスワードなしで接続できる SSH 鍵認証（`BatchMode=yes`）を設定したうえで、**設定 > リモート** から **リモートSSHクォータ照会を使用** を有効にし、`user@hostname` または `~/.ssh/config` のエイリアスを入力して **接続テスト** を実行してください。
+
+</details>
+
+---
+
+## コントリビュート
+
+バグ報告、機能提案、プルリクエストを歓迎します！
+
+- ローカル開発手順、純粋 Swift 規約、多言語ガイドラインについては [CONTRIBUTING.md](../CONTRIBUTING.md) をご確認ください。
+- バグ報告や機能要望は [GitHub Issue テンプレート](https://github.com/badugisoft/antigravity-quota/issues/new/choose) からお送りください。
+- プライバシー設計や脆弱性の報告については [SECURITY.md](../SECURITY.md) をご確認ください。
+
+---
+
 ## プロジェクト構成
 
 ```
 antigravity-quota/
 ├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.md                        # バグ報告テンプレート
+│   │   ├── feature_request.md                   # 機能リクエストテンプレート
+│   │   └── config.yml                           # Issue 選択画面＆リリースリンク
+│   ├── PULL_REQUEST_TEMPLATE.md                 # Pull Request チェックリストテンプレート
+│   ├── release.yml                              # リリースノート分類ルール
 │   └── workflows/
 │       └── release.yml                          # GitHub Actions CI/CD リリースワークフロー
 ├── Package.swift                                # SwiftPM マルチターゲット構成
 ├── LICENSE                                      # MIT ライセンス
 ├── README.md                                    # 英語ドキュメント（ルート）
+├── CONTRIBUTING.md                              # コントリビュートガイド＆規約
+├── SECURITY.md                                  # プライバシー＆セキュリティポリシー
 ├── AGENTS.md                                    # AI エージェント＆コントリビューター向けガイド
 ├── docs/                                        # 多言語ドキュメント
 │   ├── README.ko.md                             # 한국어
