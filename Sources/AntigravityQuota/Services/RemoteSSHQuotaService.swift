@@ -61,6 +61,12 @@ public final class RemoteSSHQuotaService: Sendable {
         fi
         LINE=$(ps -ww -p "$PID" -o command= 2>/dev/null || ps -p "$PID" -o args= 2>/dev/null || ps aux | grep "$PID" | head -n 1)
         TOKEN=$(echo "$LINE" | grep -oE 'csrf_token[= ][^ ]+' | head -n 1 | sed 's/csrf_token[= ]*//' | tr -d '"'"'")
+        if [ -z "$TOKEN" ]; then
+          TOKEN=$(ps eww -p "$PID" 2>/dev/null | grep -oE 'ANTIGRAVITY_SERVER_CSRF_TOKEN=[^ ]+' | head -n 1 | sed 's/^ANTIGRAVITY_SERVER_CSRF_TOKEN=//' | tr -d '"'"'")
+        fi
+        if [ -z "$TOKEN" ] && [ -r "/proc/$PID/environ" ]; then
+          TOKEN=$(tr '\\0' '\\n' < "/proc/$PID/environ" 2>/dev/null | grep -E '^ANTIGRAVITY_SERVER_CSRF_TOKEN=' | head -n 1 | sed 's/^ANTIGRAVITY_SERVER_CSRF_TOKEN=//' | tr -d '"'"'")
+        fi
         PORTS=$( (lsof -Pan -p "$PID" -iTCP -sTCP:LISTEN 2>/dev/null | awk 'NR>1 {print $9}' | awk -F: '{print $NF}'; netstat -anv -p tcp 2>/dev/null | grep LISTEN | grep ":$PID" | awk '{print $4}' | awk -F. '{print $NF}'; ss -tlnp 2>/dev/null | grep "pid=$PID," | awk '{print $4}' | awk -F: '{print $NF}') | grep -E '^[0-9]+$' | sort -u )
         if [ -z "$PORTS" ]; then
           echo "{\\"error\\":\\"PORT_NOT_FOUND\\",\\"pid\\":\\"$PID\\",\\"token\\":\\"${TOKEN:0:6}...\\"}"

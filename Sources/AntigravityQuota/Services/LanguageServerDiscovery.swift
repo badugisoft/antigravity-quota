@@ -63,11 +63,74 @@ public final class LanguageServerDiscovery {
     
     // MARK: - Process & Port Discovery
     
-    /// Inspects running processes via `/bin/ps` to find `language_server` and extract its PID and `--csrf_token`.
+    /// Extracts the CSRF token from a process command line or environment string.
+    /// Supports both environment variable (`ANTIGRAVITY_SERVER_CSRF_TOKEN=<token>`)
+    /// and legacy CLI flag (`--csrf_token <token>` / `-csrf_token=<token>`).
+    public static func extractCsrfToken(from text: String) -> String? {
+        let patterns = [
+            "ANTIGRAVITY_SERVER_CSRF_TOKEN=[\"']?([a-zA-Z0-9-]+)[\"']?",
+            "--?csrf_token(?:=|\\s+)[\"']?([a-zA-Z0-9-]+)[\"']?"
+        ]
+        
+        let fullRange = NSRange(text.startIndex..<text.endIndex, in: text)
+        for pattern in patterns {
+            guard let regex = try? NSRegularExpression(pattern: pattern),
+                  let match = regex.firstMatch(in: text, range: fullRange),
+                  match.numberOfRanges >= 2,
+                  let tokenRange = Range(match.range(at: 1), in: text) else {
+                continue
+            }
+            return String(text[tokenRange])
+        }
+        
+        return nil
+    }
+    
+    /// Inspects running processes via `/bin/ps` to find `language_server` and extract its PID and CSRF token.
+    /// Checks CLI arguments first (`--csrf_token`), then falls back to environment variables (`ps eww -p <pid>`).
     private func findLanguageServerProcess() -> (pid: Int32, csrfToken: String)? {
+        guard let output = runPs(arguments: ["-eo", "pid,command"]) else {
+            return nil
+        }
+        
+        var directCandidates: [Int32] = []
+        var secondaryCandidates: [Int32] = []
+        
+        let lines = output.components(separatedBy: "\n")
+        for line in lines {
+            guard line.contains("language_server") else { continue }
+            
+            let tokens = line.split(whereSeparator: { $0.isWhitespace })
+            guard let first = tokens.first, let pid = Int32(first) else { continue }
+            
+            // Legacy format: --csrf_token passed directly in CLI arguments
+            if let token = Self.extractCsrfToken(from: line) {
+                return (pid, token)
+            }
+            
+            // Prioritize processes whose executable token itself references language_server
+            if tokens.count >= 2 && tokens[1].contains("language_server") {
+                directCandidates.append(pid)
+            } else {
+                secondaryCandidates.append(pid)
+            }
+        }
+        
+        // Antigravity 2.34.0+ passes CSRF token via ANTIGRAVITY_SERVER_CSRF_TOKEN environment variable
+        for pid in directCandidates + secondaryCandidates {
+            if let envOutput = runPs(arguments: ["eww", "-p", "\(pid)"]),
+               let token = Self.extractCsrfToken(from: envOutput) {
+                return (pid, token)
+            }
+        }
+        
+        return nil
+    }
+    
+    private func runPs(arguments: [String]) -> String? {
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/bin/ps")
-        task.arguments = ["-eo", "pid,command"]
+        task.arguments = arguments
         
         let pipe = Pipe()
         task.standardOutput = pipe
@@ -78,32 +141,11 @@ public final class LanguageServerDiscovery {
             // Read data before waitUntilExit to prevent pipe buffer deadlocks
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
             task.waitUntilExit()
-            
-            guard let output = String(data: data, encoding: .utf8) else { return nil }
-            
-            let lines = output.components(separatedBy: "\n")
-            for line in lines {
-                if line.contains("language_server") && line.contains("--csrf_token") {
-                    // Extract PID and token
-                    let trimmed = line.trimmingCharacters(in: .whitespaces)
-                    let components = trimmed.components(separatedBy: .whitespaces)
-                    guard let first = components.first, let pid = Int32(first) else { continue }
-                    
-                    if let tokenRange = line.range(of: "--csrf_token\\s+([a-zA-Z0-9-]+)", options: .regularExpression) {
-                        let sub = String(line[tokenRange])
-                        let parts = sub.components(separatedBy: .whitespaces)
-                        if parts.count >= 2 {
-                            let token = parts[1]
-                            return (pid, token)
-                        }
-                    }
-                }
-            }
+            return String(data: data, encoding: .utf8)
         } catch {
-            print("[Discovery] Error running ps: \(error)")
+            print("[Discovery] Error running ps \(arguments.joined(separator: " ")): \(error)")
+            return nil
         }
-        
-        return nil
     }
     
     /// Finds TCP listening ports for the specified PID using `/usr/sbin/lsof` with `/usr/sbin/netstat` fallback.

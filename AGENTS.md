@@ -99,6 +99,9 @@ Sources/
 - **Privilege & Output Integrity in Child Processes**:
   - On macOS (Sonoma, Sequoia), `/usr/sbin/netstat` executed in child processes without full TTY or root permissions can yield 0 bytes of output or omit PID mappings.
   - `LanguageServerDiscovery` uses `/usr/sbin/lsof -iTCP -sTCP:LISTEN -n -P -a -p <pid>` to reliably extract listening TCP ports for the user's running processes, with a fallback to `netstat`.
+- **CSRF Token Extraction (CLI Flag & Environment Variable)**:
+  - Starting with Antigravity 2.34.0+, `language_server` no longer passes `--csrf_token` on the command line and instead passes `ANTIGRAVITY_SERVER_CSRF_TOKEN=<token>` in its process environment.
+  - `LanguageServerDiscovery` checks `/bin/ps -eo pid,command` for legacy `--csrf_token` flags first, then queries `/bin/ps eww -p <pid>` to extract `ANTIGRAVITY_SERVER_CSRF_TOKEN` (and `RemoteSSHQuotaService` checks both `ps eww` and `/proc/$PID/environ`).
 - **Preserve Endpoint Protocol Scheme**:
   - `language_server` may listen on either HTTP or HTTPS depending on active flags.
   - Candidate endpoints must preserve their protocol scheme (`httpCandidate` vs `httpsCandidate`); returning an HTTP candidate after HTTPS validation succeeds will cause HTTP 400 Bad Request ('Client sent an HTTP request to an HTTPS server').

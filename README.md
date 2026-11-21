@@ -99,7 +99,7 @@
 Antigravity runs an internal language server daemon (`language_server`) listening on an ephemeral local TCP port.
 
 1. **Process & CSRF Token Extraction**:
-   Inspects `/bin/ps` to locate the active `language_server` process and securely extracts the session `--csrf_token`.
+   Inspects `/bin/ps` to locate the active `language_server` process and extracts the session CSRF token from either CLI arguments (`--csrf_token`) or process environment variables (`ANTIGRAVITY_SERVER_CSRF_TOKEN` in Antigravity 2.34.0+ via `ps eww -p <pid>`).
 2. **Instant Port Resolution**:
    Uses `/usr/sbin/lsof` (with `/usr/sbin/netstat` fallback) to find active listening TCP sockets for the detected PID in sub-milliseconds without port scanning overhead.
 3. **Connect-RPC Protocol**:

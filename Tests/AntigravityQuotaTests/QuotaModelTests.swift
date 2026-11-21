@@ -537,4 +537,27 @@ final class QuotaModelTests: XCTestCase {
             XCTAssertFalse(LocalizedStringKey.sshNotice.string(for: lang).isEmpty, "Missing sshNotice for \(lang)")
         }
     }
+    
+    func testCsrfTokenExtraction() {
+        let legacyLine = "70511 /Applications/Antigravity.app/Contents/Resources/bin/language_server --csrf_token 12345678-abcd-ef01-2345-6789abcdef01 --https_server_port 0"
+        XCTAssertEqual(
+            LanguageServerDiscovery.extractCsrfToken(from: legacyLine),
+            "12345678-abcd-ef01-2345-6789abcdef01"
+        )
+        
+        let legacyEqualsLine = "70511 /Applications/Antigravity.app/Contents/Resources/bin/language_server --csrf_token=12345678-abcd-ef01-2345-6789abcdef01"
+        XCTAssertEqual(
+            LanguageServerDiscovery.extractCsrfToken(from: legacyEqualsLine),
+            "12345678-abcd-ef01-2345-6789abcdef01"
+        )
+        
+        let envLine = "70511   ??  S      0:05.29 /Applications/Antigravity.app/Contents/Resources/bin/language_server --standalone --override_ide_name antigravity GOPATH=/Users/test/go ANTIGRAVITY_SERVER_CSRF_TOKEN=3d2b0587-eab4-4161-a658-73bea21aab21 AGY_REQUIRE_AUTHENTICATED_UI_BOOTSTRAP=1"
+        XCTAssertEqual(
+            LanguageServerDiscovery.extractCsrfToken(from: envLine),
+            "3d2b0587-eab4-4161-a658-73bea21aab21"
+        )
+        
+        let missingTokenLine = "70511 /Applications/Antigravity.app/Contents/Resources/bin/language_server --standalone --https_server_port 0"
+        XCTAssertNil(LanguageServerDiscovery.extractCsrfToken(from: missingTokenLine))
+    }
 }
