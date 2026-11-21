@@ -4,25 +4,34 @@ import AntigravityQuotaCore
 /// Compact mode card view displaying a minimal overview of quota buckets for a model group.
 public struct QuotaGroupCompactCardView: View {
     public let group: QuotaGroup
+    public let groupIndex: Int
     public let currentNow: Date
     public let language: AppLanguage
     
-    public init(group: QuotaGroup, currentNow: Date = Date(), language: AppLanguage = .en) {
+    private static let stylePalette: [(icon: String, color: Color)] = [
+        ("sparkles", .indigo),
+        ("bolt.badge.automatic", .purple),
+        ("cpu", .teal),
+        ("cube", .blue)
+    ]
+    
+    public init(group: QuotaGroup, groupIndex: Int = 0, currentNow: Date = Date(), language: AppLanguage = .en) {
         self.group = group
+        self.groupIndex = groupIndex
         self.currentNow = currentNow
         self.language = language
     }
     
-    private var isGemini: Bool {
-        group.displayName.localizedCaseInsensitiveContains("gemini")
+    private var groupStyle: (icon: String, color: Color) {
+        Self.stylePalette[abs(groupIndex) % Self.stylePalette.count]
     }
     
     private var groupIconName: String {
-        isGemini ? "sparkles" : "bolt.badge.automatic"
+        groupStyle.icon
     }
     
     private var groupAccentColor: Color {
-        isGemini ? Color.indigo : Color.purple
+        groupStyle.color
     }
     
     public var body: some View {
@@ -39,21 +48,10 @@ public struct QuotaGroupCompactCardView: View {
                 Spacer()
             }
             
-            // 5-Hour row
-            if let fiveHourBucket = group.fiveHourBucket {
+            ForEach(group.orderedBuckets) { bucket in
                 QuotaBucketCompactRowView(
-                    title: LocalizedStringKey.fiveHourShort.string(for: language),
-                    bucket: fiveHourBucket,
-                    currentNow: currentNow,
-                    language: language
-                )
-            }
-            
-            // Weekly row
-            if let weeklyBucket = group.weeklyBucket {
-                QuotaBucketCompactRowView(
-                    title: LocalizedStringKey.weeklyShort.string(for: language),
-                    bucket: weeklyBucket,
+                    title: bucket.localizedWindowTitle(for: language, short: true),
+                    bucket: bucket,
                     currentNow: currentNow,
                     language: language
                 )

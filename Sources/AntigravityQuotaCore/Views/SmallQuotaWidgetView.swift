@@ -12,12 +12,16 @@ public struct SmallQuotaWidgetView: View {
         self.language = language
     }
     
+    private var isDense: Bool {
+        snapshot.groups.count >= 3
+    }
+    
     public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
             HStack(spacing: 5) {
                 Image(systemName: "sparkles")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: isDense ? 12 : 13, weight: .semibold))
                     .foregroundStyle(LinearGradient(
                         colors: [Color.blue, Color.purple],
                         startPoint: .topLeading,
@@ -25,7 +29,7 @@ public struct SmallQuotaWidgetView: View {
                     ))
                 
                 Text("AGY Quota")
-                    .font(.system(size: 12.5, weight: .bold))
+                    .font(.system(size: isDense ? 12 : 12.5, weight: .bold))
                     .lineLimit(1)
                 
                 Spacer()
@@ -49,40 +53,30 @@ public struct SmallQuotaWidgetView: View {
                 .frame(maxWidth: .infinity)
                 Spacer()
             } else {
-                Spacer(minLength: 6)
+                Spacer(minLength: isDense ? 4 : 6)
                 
-                VStack(spacing: 9) {
-                    // Gemini Row
-                    if let geminiGroup = snapshot.geminiGroup,
-                       let bucket = geminiGroup.fiveHourBucket ?? geminiGroup.buckets.first {
-                        quotaRow(
-                            title: "Gemini",
-                            percentage: bucket.remainingPercentage,
-                            fraction: bucket.remainingFraction
-                        )
-                    }
-                    
-                    // Claude / GPT Row
-                    if let claudeGroup = snapshot.claudeGptGroup,
-                       let bucket = claudeGroup.fiveHourBucket ?? claudeGroup.buckets.first {
-                        quotaRow(
-                            title: "Claude",
-                            percentage: bucket.remainingPercentage,
-                            fraction: bucket.remainingFraction
-                        )
+                VStack(spacing: isDense ? 5 : 9) {
+                    ForEach(snapshot.groups) { group in
+                        if let bucket = group.primaryBucket {
+                            quotaRow(
+                                title: group.shortDisplayName,
+                                percentage: bucket.remainingPercentage,
+                                fraction: bucket.remainingFraction
+                            )
+                        }
                     }
                 }
                 
-                Spacer(minLength: 6)
+                Spacer(minLength: isDense ? 4 : 6)
                 
                 // Footer: Nearest reset timer
                 HStack(spacing: 4) {
                     Image(systemName: "clock")
-                        .font(.system(size: 10, weight: .medium))
+                        .font(.system(size: isDense ? 9.5 : 10, weight: .medium))
                         .foregroundColor(.secondary)
                     
                     Text(snapshot.formattedNearestReset(from: date, language: language))
-                        .font(.system(size: 10.5, weight: .medium))
+                        .font(.system(size: isDense ? 10 : 10.5, weight: .medium))
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                     
@@ -91,41 +85,45 @@ public struct SmallQuotaWidgetView: View {
             }
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 12)
+        .padding(.vertical, isDense ? 10 : 12)
         .applyWidgetBackground()
     }
     
     @ViewBuilder
     private func quotaRow(title: String, percentage: Int, fraction: Double) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            HStack {
+        let barHeight: CGFloat = isDense ? 4.5 : 6
+        VStack(alignment: .leading, spacing: isDense ? 2 : 3) {
+            HStack(spacing: 4) {
                 Text(title)
-                    .font(.system(size: 12.5, weight: .semibold))
-                Spacer()
+                    .font(.system(size: isDense ? 11 : 12.5, weight: .semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Spacer(minLength: 2)
                 Text("\(percentage)%")
-                    .font(.system(size: 13.5, weight: .bold, design: .rounded))
+                    .font(.system(size: isDense ? 12 : 13.5, weight: .bold, design: .rounded))
                     .foregroundColor(colorForPercentage(percentage))
+                    .fixedSize(horizontal: true, vertical: false)
             }
             
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule()
                         .fill(Color.primary.opacity(0.12))
-                        .frame(height: 6)
+                        .frame(height: barHeight)
                     
                     Capsule()
                         .fill(colorForPercentage(percentage))
-                        .frame(width: max(0, min(geo.size.width, geo.size.width * CGFloat(fraction))), height: 6)
+                        .frame(width: max(0, min(geo.size.width, geo.size.width * CGFloat(fraction))), height: barHeight)
                 }
             }
-            .frame(height: 6)
+            .frame(height: barHeight)
         }
     }
     
     private func colorForPercentage(_ percentage: Int) -> Color {
-        if percentage >= 50 {
-            return .green
-        } else if percentage >= 20 {
+        if percentage > 50 {
+            return .blue
+        } else if percentage > 20 {
             return .orange
         } else {
             return .red

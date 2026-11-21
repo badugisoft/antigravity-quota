@@ -11,6 +11,12 @@ public struct SettingsView: View {
     @State private var selectedTab: SettingsTab = .general
     @State private var testNotificationSent: Bool = false
     @State private var permissionStatus: UNAuthorizationStatus = .notDetermined
+    @State private var availableGroups: [QuotaGroup] = SettingsView.loadAvailableGroups()
+    
+    private static func loadAvailableGroups() -> [QuotaGroup] {
+        let saved = QuotaDataStore.shared.loadLatestSnapshot().groups
+        return saved.isEmpty ? QuotaSnapshot.placeholder.groups : saved
+    }
     
     private var isSystemAuthorized: Bool {
         permissionStatus == .authorized || permissionStatus == .provisional
@@ -57,9 +63,11 @@ public struct SettingsView: View {
         .frame(width: 540, height: 460)
         .environment(\.locale, localization.currentLanguage.locale)
         .onAppear {
+            availableGroups = Self.loadAvailableGroups()
             refreshPermissionStatus()
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            availableGroups = Self.loadAvailableGroups()
             refreshPermissionStatus()
         }
     }
@@ -100,11 +108,17 @@ public struct SettingsView: View {
                 .padding(.vertical, 4)
                 
                 // Menu Bar Gauge Target Selection
-                Picker(localization.string(.menuBarGaugeSource), selection: $settings.menuBarGaugeSource) {
-                    Text(localization.string(.gaugeGemini5h)).tag(MenuBarGaugeSource.gemini5h)
-                    Text(localization.string(.gaugeGeminiWeekly)).tag(MenuBarGaugeSource.geminiWeekly)
-                    Text(localization.string(.gaugeClaude5h)).tag(MenuBarGaugeSource.claude5h)
-                    Text(localization.string(.gaugeClaudeWeekly)).tag(MenuBarGaugeSource.claudeWeekly)
+                Picker(localization.string(.menuBarGaugeSource), selection: $settings.menuBarGaugeBucketId) {
+                    ForEach(availableGroups) { group in
+                        ForEach(group.orderedBuckets) { bucket in
+                            Text("\(group.shortDisplayName) (\(bucket.localizedWindowTitle(for: localization.currentLanguage, short: true)))")
+                                .tag(bucket.bucketId)
+                        }
+                    }
+                    if !availableGroups.flatMap(\.buckets).contains(where: { $0.bucketId == settings.menuBarGaugeBucketId }) {
+                        Text(settings.menuBarGaugeBucketId)
+                            .tag(settings.menuBarGaugeBucketId)
+                    }
                 }
                 .pickerStyle(.menu)
                 .padding(.vertical, 4)

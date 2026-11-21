@@ -4,25 +4,34 @@ import AntigravityQuotaCore
 /// Standard mode card view displaying a group of quota buckets with model icons.
 public struct QuotaGroupCardView: View {
     public let group: QuotaGroup
+    public let groupIndex: Int
     public let currentNow: Date
     public let language: AppLanguage
     
-    public init(group: QuotaGroup, currentNow: Date = Date(), language: AppLanguage = .en) {
+    private static let stylePalette: [(icon: String, color: Color)] = [
+        ("sparkles", .indigo),
+        ("bolt.badge.automatic", .purple),
+        ("cpu", .teal),
+        ("cube", .blue)
+    ]
+    
+    public init(group: QuotaGroup, groupIndex: Int = 0, currentNow: Date = Date(), language: AppLanguage = .en) {
         self.group = group
+        self.groupIndex = groupIndex
         self.currentNow = currentNow
         self.language = language
     }
     
-    private var isGemini: Bool {
-        group.displayName.localizedCaseInsensitiveContains("gemini")
+    private var groupStyle: (icon: String, color: Color) {
+        Self.stylePalette[abs(groupIndex) % Self.stylePalette.count]
     }
     
     private var groupIconName: String {
-        isGemini ? "sparkles" : "bolt.badge.automatic"
+        groupStyle.icon
     }
     
     private var groupAccentColor: Color {
-        isGemini ? Color.indigo : Color.purple
+        groupStyle.color
     }
     
     public var body: some View {
@@ -54,21 +63,10 @@ public struct QuotaGroupCardView: View {
                 Spacer()
             }
             
-            // 5-Hour reset bucket
-            if let fiveHourBucket = group.fiveHourBucket {
+            ForEach(group.orderedBuckets) { bucket in
                 QuotaBucketRowView(
-                    title: LocalizedStringKey.fiveHourResetTitle.string(for: language),
-                    bucket: fiveHourBucket,
-                    currentNow: currentNow,
-                    language: language
-                )
-            }
-            
-            // Weekly reset bucket
-            if let weeklyBucket = group.weeklyBucket {
-                QuotaBucketRowView(
-                    title: LocalizedStringKey.weeklyResetTitle.string(for: language),
-                    bucket: weeklyBucket,
+                    title: bucket.localizedWindowTitle(for: language, short: false),
+                    bucket: bucket,
                     currentNow: currentNow,
                     language: language
                 )

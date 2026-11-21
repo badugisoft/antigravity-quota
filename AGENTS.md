@@ -106,6 +106,12 @@ Sources/
   - `language_server` may listen on either HTTP or HTTPS depending on active flags.
   - Candidate endpoints must preserve their protocol scheme (`httpCandidate` vs `httpsCandidate`); returning an HTTP candidate after HTTPS validation succeeds will cause HTTP 400 Bad Request ('Client sent an HTTP request to an HTTPS server').
 
+### I. Dynamic Group & Bucket Rendering (Zero Hardcoded Model Names)
+- **Server-Driven Groups & Buckets**:
+  - Do not hardcode model group lookups (`geminiGroup`, `claudeGptGroup`, `isGemini`) or fixed enum cases (`MenuBarGaugeSource`) for quota categories.
+  - Menu bar summary abbreviations are generated dynamically via `QuotaGroup.dynamicAbbreviations(for:)`.
+  - Popover cards (`MenuBarPopoverView`, `QuotaGroupCardView`, `QuotaGroupCompactCardView`), widgets (`SmallQuotaWidgetView`, `MediumQuotaWidgetView`), and Settings (`AppSettings.menuBarGaugeBucketId` + `QuotaSnapshot.resolveGaugeBucket`) iterate `groups` and `group.orderedBuckets` directly so newly added or renamed server groups work without code changes.
+
 ---
 
 ## 4. Common Commands

@@ -144,7 +144,7 @@ public final class QuotaViewModel: ObservableObject {
             }
             .store(in: &cancellables)
             
-        settings.$menuBarGaugeSource
+        settings.$menuBarGaugeBucketId
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.updateLowestRemainingFraction()
@@ -324,17 +324,8 @@ public final class QuotaViewModel: ObservableObject {
     // MARK: - Refill Detection & Gauge Calculation
     
     public func updateLowestRemainingFraction() {
-        let fraction: Double
-        switch settings.menuBarGaugeSource {
-        case .gemini5h:
-            fraction = geminiGroup?.fiveHourBucket?.remainingFraction ?? 1.0
-        case .geminiWeekly:
-            fraction = geminiGroup?.weeklyBucket?.remainingFraction ?? 1.0
-        case .claude5h:
-            fraction = claudeGptGroup?.fiveHourBucket?.remainingFraction ?? 1.0
-        case .claudeWeekly:
-            fraction = claudeGptGroup?.weeklyBucket?.remainingFraction ?? 1.0
-        }
+        let bucket = QuotaSnapshot.resolveGaugeBucket(in: groups, targetId: settings.menuBarGaugeBucketId)
+        let fraction = bucket?.remainingFraction ?? 1.0
         self.lowestRemainingFraction = max(0.0, min(1.0, fraction))
     }
     
@@ -407,19 +398,6 @@ public final class QuotaViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Helper Accessors
-    
-    public var geminiGroup: QuotaGroup? {
-        groups.first(where: { $0.displayName.localizedCaseInsensitiveContains("gemini") })
-    }
-    
-    public var claudeGptGroup: QuotaGroup? {
-        groups.first(where: {
-            $0.displayName.localizedCaseInsensitiveContains("claude") ||
-            $0.displayName.localizedCaseInsensitiveContains("gpt")
-        })
-    }
-    
     // MARK: - Menu Bar Summary
     
     private func updateMenuBarSummary() {
@@ -428,35 +406,27 @@ public final class QuotaViewModel: ObservableObject {
             return
         }
         
-        if !isServerOnline {
-            if groups.isEmpty {
-                menuBarSummary = localization.string(.menuBarWaiting)
-            } else {
-                var parts: [String] = []
-                if let gGroup = geminiGroup, let bucket = gGroup.fiveHourBucket {
-                    parts.append("G:\(bucket.remainingPercentage)%")
-                }
-                if let cGroup = claudeGptGroup, let bucket = cGroup.fiveHourBucket {
-                    parts.append("C:\(bucket.remainingPercentage)%")
-                }
-                menuBarSummary = "⏸ " + parts.joined(separator: " · ")
-            }
-            return
-        }
-        
+        let abbreviations = QuotaGroup.dynamicAbbreviations(for: groups)
         var parts: [String] = []
         var isAnyLow = false
         
-        if let gGroup = geminiGroup, let bucket = gGroup.fiveHourBucket {
+        for group in groups {
+            guard let bucket = group.primaryBucket else { continue }
+            let abbr = abbreviations[group.id] ?? String(group.displayName.prefix(1)).uppercased()
             let pct = bucket.remainingPercentage
-            parts.append("G:\(pct)%")
-            if pct < 20 { isAnyLow = true }
+            parts.append("\(abbr):\(pct)%")
+            if isServerOnline && pct < 20 {
+                isAnyLow = true
+            }
         }
         
-        if let cGroup = claudeGptGroup, let bucket = cGroup.fiveHourBucket {
-            let pct = bucket.remainingPercentage
-            parts.append("C:\(pct)%")
-            if pct < 20 { isAnyLow = true }
+        if !isServerOnline {
+            if parts.isEmpty {
+                menuBarSummary = localization.string(.menuBarWaiting)
+            } else {
+                menuBarSummary = "⏸ " + parts.joined(separator: " · ")
+            }
+            return
         }
         
         let prefix = isAnyLow ? "⚠️ " : ""

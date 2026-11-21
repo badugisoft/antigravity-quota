@@ -31,15 +31,26 @@ public struct QuotaSnapshot: Codable {
     
     // MARK: - Helper Accessors
     
-    public var geminiGroup: QuotaGroup? {
-        groups.first(where: { $0.displayName.localizedCaseInsensitiveContains("gemini") })
-    }
-    
-    public var claudeGptGroup: QuotaGroup? {
-        groups.first(where: {
-            $0.displayName.localizedCaseInsensitiveContains("claude") ||
-            $0.displayName.localizedCaseInsensitiveContains("gpt")
-        })
+    /// Resolves the target gauge bucket from groups by bucketId, supporting legacy MenuBarGaugeSource raw values.
+    public static func resolveGaugeBucket(in groups: [QuotaGroup], targetId: String) -> QuotaBucket? {
+        for group in groups {
+            if let match = group.buckets.first(where: { $0.bucketId == targetId }) {
+                return match
+            }
+        }
+        
+        switch targetId {
+        case "gemini5h":
+            return groups.first?.fiveHourBucket ?? groups.first?.primaryBucket
+        case "geminiWeekly":
+            return groups.first?.weeklyBucket ?? groups.first?.primaryBucket
+        case "claude5h":
+            return groups.dropFirst().first?.fiveHourBucket ?? groups.dropFirst().first?.primaryBucket
+        case "claudeWeekly":
+            return groups.dropFirst().first?.weeklyBucket ?? groups.dropFirst().first?.primaryBucket
+        default:
+            return groups.first?.primaryBucket
+        }
     }
     
     /// Finds the earliest reset Date across all buckets that are not yet 100% full.
@@ -111,20 +122,31 @@ public struct QuotaSnapshot: Codable {
         
         let sampleClaudeBuckets = [
             QuotaBucket(
-                bucketId: "claude-5h",
-                displayName: "Claude 5-Hour",
+                bucketId: "3p-5h",
+                displayName: "Five Hour Limit Remaining",
                 description: nil,
                 window: "5h",
                 remainingFraction: 0.75,
                 resetTime: ISO8601DateFormatter().string(from: Date().addingTimeInterval(3600 * 2))
             ),
             QuotaBucket(
-                bucketId: "claude-weekly",
-                displayName: "Claude Weekly",
+                bucketId: "3p-weekly",
+                displayName: "Weekly Limit Remaining",
                 description: nil,
                 window: "weekly",
                 remainingFraction: 0.60,
                 resetTime: ISO8601DateFormatter().string(from: Date().addingTimeInterval(86400 * 3))
+            )
+        ]
+        
+        let sampleArgonBuckets = [
+            QuotaBucket(
+                bucketId: "gemini-argon-wtu-weekly",
+                displayName: "Gemini 4 Argon Weekly Limit",
+                description: nil,
+                window: "weekly",
+                remainingFraction: 0.85,
+                resetTime: ISO8601DateFormatter().string(from: Date().addingTimeInterval(86400 * 6))
             )
         ]
         
@@ -133,7 +155,8 @@ public struct QuotaSnapshot: Codable {
             isOnline: true,
             groups: [
                 QuotaGroup(displayName: "Gemini Models", buckets: sampleGeminiBuckets),
-                QuotaGroup(displayName: "Claude & Others", buckets: sampleClaudeBuckets)
+                QuotaGroup(displayName: "Claude and GPT models", buckets: sampleClaudeBuckets),
+                QuotaGroup(displayName: "Gemini 4 Argon", buckets: sampleArgonBuckets)
             ],
             description: "Antigravity Pro Quota"
         )

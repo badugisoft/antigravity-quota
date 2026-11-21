@@ -2,16 +2,6 @@ import Foundation
 import ServiceManagement
 import Combine
 
-/// Target quota bucket reflected in the menu bar circular progress gauge.
-public enum MenuBarGaugeSource: String, CaseIterable, Identifiable, Codable {
-    case gemini5h = "gemini5h"
-    case geminiWeekly = "geminiWeekly"
-    case claude5h = "claude5h"
-    case claudeWeekly = "claudeWeekly"
-    
-    public var id: String { rawValue }
-}
-
 /// Manages user preferences and persistent settings across the application.
 public final class AppSettings: ObservableObject {
     public static let shared = AppSettings()
@@ -20,6 +10,7 @@ public final class AppSettings: ObservableObject {
     private enum Keys {
         static let showMenuBarText = "showMenuBarText"
         static let menuBarGaugeSource = "menuBarGaugeSource"
+        static let menuBarGaugeBucketId = "menuBarGaugeBucketId"
         static let launchAtLogin = "launchAtLogin"
         static let notifyQuotaRefilled = "notifyQuotaRefilled"
         static let notifyFiveHourReset = "notifyFiveHourReset"
@@ -34,9 +25,9 @@ public final class AppSettings: ObservableObject {
     
     // MARK: - Published Properties
     
-    /// Which quota bucket is displayed in the menu bar circular gauge ring. Default is .gemini5h.
-    @Published public var menuBarGaugeSource: MenuBarGaugeSource {
-        didSet { defaults.set(menuBarGaugeSource.rawValue, forKey: Keys.menuBarGaugeSource) }
+    /// Target quota bucket ID reflected in the menu bar circular progress gauge. Default is "gemini-5h".
+    @Published public var menuBarGaugeBucketId: String {
+        didSet { defaults.set(menuBarGaugeBucketId, forKey: Keys.menuBarGaugeBucketId) }
     }
     
     /// Whether to display quota percentages in the macOS menu bar next to the icon. Default is true.
@@ -88,12 +79,13 @@ public final class AppSettings: ObservableObject {
     }
     
     public init() {
-        // Default menuBarGaugeSource is .gemini5h
-        if let savedSource = defaults.string(forKey: Keys.menuBarGaugeSource),
-           let source = MenuBarGaugeSource(rawValue: savedSource) {
-            self.menuBarGaugeSource = source
+        // Default menuBarGaugeBucketId is "gemini-5h", migrating legacy menuBarGaugeSource if present
+        if let savedBucketId = defaults.string(forKey: Keys.menuBarGaugeBucketId), !savedBucketId.isEmpty {
+            self.menuBarGaugeBucketId = savedBucketId
+        } else if let legacySource = defaults.string(forKey: Keys.menuBarGaugeSource) {
+            self.menuBarGaugeBucketId = Self.migrateLegacyGaugeSource(legacySource)
         } else {
-            self.menuBarGaugeSource = .gemini5h
+            self.menuBarGaugeBucketId = "gemini-5h"
         }
         
         // Default showMenuBarText is true unless explicitly set to false
@@ -134,6 +126,16 @@ public final class AppSettings: ObservableObject {
         
         // Sync launch at login status from system if available
         syncLaunchAtLoginStatus()
+    }
+    
+    public static func migrateLegacyGaugeSource(_ legacyRawValue: String) -> String {
+        switch legacyRawValue {
+        case "gemini5h": return "gemini-5h"
+        case "geminiWeekly": return "gemini-weekly"
+        case "claude5h": return "3p-5h"
+        case "claudeWeekly": return "3p-weekly"
+        default: return legacyRawValue.isEmpty ? "gemini-5h" : legacyRawValue
+        }
     }
     
     // MARK: - ServiceManagement Integration

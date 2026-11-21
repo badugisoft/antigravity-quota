@@ -136,8 +136,7 @@ final class QuotaModelTests: XCTestCase {
     
     func testQuotaSnapshotAndDataStore() {
         let snapshot = QuotaSnapshot.placeholder
-        XCTAssertNotNil(snapshot.geminiGroup)
-        XCTAssertNotNil(snapshot.claudeGptGroup)
+        XCTAssertEqual(snapshot.groups.count, 3)
         XCTAssertTrue(snapshot.isOnline)
         XCTAssertNotNil(snapshot.nearestResetDate)
         
@@ -146,6 +145,48 @@ final class QuotaModelTests: XCTestCase {
         let loaded = QuotaDataStore.shared.loadLatestSnapshot()
         XCTAssertEqual(loaded.isOnline, snapshot.isOnline)
         XCTAssertEqual(loaded.groups.count, snapshot.groups.count)
+    }
+    
+    func testDynamicGroupHelpersAndResolution() {
+        let g1 = QuotaGroup(
+            displayName: "Gemini Models",
+            buckets: [
+                QuotaBucket(bucketId: "gemini-weekly", displayName: "Weekly", window: "weekly", remainingFraction: 0.6),
+                QuotaBucket(bucketId: "gemini-5h", displayName: "5h", window: "5h", remainingFraction: 0.9)
+            ]
+        )
+        let g2 = QuotaGroup(
+            displayName: "Claude and GPT models",
+            buckets: [
+                QuotaBucket(bucketId: "3p-weekly", displayName: "Weekly", window: "weekly", remainingFraction: 1.0),
+                QuotaBucket(bucketId: "3p-5h", displayName: "5h", window: "5h", remainingFraction: 1.0)
+            ]
+        )
+        let g3 = QuotaGroup(
+            displayName: "Gemini 4 Argon",
+            buckets: [
+                QuotaBucket(bucketId: "gemini-argon-wtu-weekly", displayName: "Argon Weekly", window: "weekly", remainingFraction: 0.83)
+            ]
+        )
+        let groups = [g1, g2, g3]
+        
+        XCTAssertEqual(g1.shortDisplayName, "Gemini")
+        XCTAssertEqual(g2.shortDisplayName, "Claude & GPT")
+        XCTAssertEqual(g3.shortDisplayName, "Gemini 4 Argon")
+        
+        XCTAssertEqual(g1.orderedBuckets.map(\.bucketId), ["gemini-5h", "gemini-weekly"])
+        XCTAssertEqual(g1.primaryBucket?.bucketId, "gemini-5h")
+        XCTAssertEqual(g3.primaryBucket?.bucketId, "gemini-argon-wtu-weekly")
+        
+        let abbrs = QuotaGroup.dynamicAbbreviations(for: groups)
+        XCTAssertEqual(abbrs[g1.id], "G")
+        XCTAssertEqual(abbrs[g2.id], "C")
+        XCTAssertEqual(abbrs[g3.id], "A")
+        
+        XCTAssertEqual(QuotaSnapshot.resolveGaugeBucket(in: groups, targetId: "gemini-argon-wtu-weekly")?.bucketId, "gemini-argon-wtu-weekly")
+        XCTAssertEqual(QuotaSnapshot.resolveGaugeBucket(in: groups, targetId: "gemini5h")?.bucketId, "gemini-5h")
+        XCTAssertEqual(QuotaSnapshot.resolveGaugeBucket(in: groups, targetId: "claudeWeekly")?.bucketId, "3p-weekly")
+        XCTAssertEqual(QuotaSnapshot.resolveGaugeBucket(in: groups, targetId: "unknown-id")?.bucketId, "gemini-5h")
     }
     
     func testLocalizedTimeFormatting() {
@@ -180,6 +221,20 @@ final class QuotaModelTests: XCTestCase {
         let hcCardStd = NSHostingController(rootView: cardStd)
         let stdCardSize = hcCardStd.sizeThatFits(in: NSSize(width: 316, height: 1000))
         XCTAssertGreaterThan(stdCardSize.height, 150.0)
+        
+        // Verify Small (155x155) and Medium (325x155) widgets fit 3 groups across all 7 languages
+        let snapshot3 = QuotaSnapshot.placeholder
+        for lang in AppLanguage.allCases {
+            let smallView = SmallQuotaWidgetView(snapshot: snapshot3, date: now, language: lang)
+                .fixedSize(horizontal: false, vertical: true)
+            let smallSize = NSHostingController(rootView: smallView).sizeThatFits(in: NSSize(width: 155, height: 500))
+            XCTAssertLessThanOrEqual(smallSize.height, 155.0, "Language \(lang.rawValue) small widget exceeded 155pt height: \(smallSize.height)")
+            
+            let mediumView = MediumQuotaWidgetView(snapshot: snapshot3, date: now, language: lang)
+                .fixedSize(horizontal: false, vertical: true)
+            let mediumSize = NSHostingController(rootView: mediumView).sizeThatFits(in: NSSize(width: 325, height: 500))
+            XCTAssertLessThanOrEqual(mediumSize.height, 155.0, "Language \(lang.rawValue) medium widget exceeded 155pt height: \(mediumSize.height)")
+        }
     }
     
     @MainActor
@@ -456,10 +511,11 @@ final class QuotaModelTests: XCTestCase {
     
     func testAppSettingsDefaultsAndPersistence() {
         let settings = AppSettings.shared
+        let previousBucketId = settings.menuBarGaugeBucketId
         
         // Check default states
         XCTAssertTrue(settings.showMenuBarText)
-        XCTAssertEqual(settings.menuBarGaugeSource, .gemini5h, "Default gauge source must be gemini5h")
+        XCTAssertFalse(settings.menuBarGaugeBucketId.isEmpty)
         XCTAssertTrue(settings.notifyQuotaRefilled)
         XCTAssertTrue(settings.notifyFiveHourReset)
         XCTAssertTrue(settings.notifyWeeklyReset)
@@ -470,10 +526,16 @@ final class QuotaModelTests: XCTestCase {
         settings.showMenuBarText = true
         XCTAssertTrue(settings.showMenuBarText)
         
-        settings.menuBarGaugeSource = .claudeWeekly
-        XCTAssertEqual(settings.menuBarGaugeSource, .claudeWeekly)
-        settings.menuBarGaugeSource = .gemini5h
-        XCTAssertEqual(settings.menuBarGaugeSource, .gemini5h)
+        settings.menuBarGaugeBucketId = "gemini-argon-wtu-weekly"
+        XCTAssertEqual(settings.menuBarGaugeBucketId, "gemini-argon-wtu-weekly")
+        settings.menuBarGaugeBucketId = previousBucketId
+        XCTAssertEqual(settings.menuBarGaugeBucketId, previousBucketId)
+        
+        // Legacy gauge source migration
+        XCTAssertEqual(AppSettings.migrateLegacyGaugeSource("gemini5h"), "gemini-5h")
+        XCTAssertEqual(AppSettings.migrateLegacyGaugeSource("geminiWeekly"), "gemini-weekly")
+        XCTAssertEqual(AppSettings.migrateLegacyGaugeSource("claude5h"), "3p-5h")
+        XCTAssertEqual(AppSettings.migrateLegacyGaugeSource("claudeWeekly"), "3p-weekly")
         
         // Remote SSH settings
         settings.enableRemoteSSH = true

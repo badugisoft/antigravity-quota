@@ -142,33 +142,11 @@ public struct MenuBarPopoverView: View {
                 .cornerRadius(8)
             } else {
                 VStack(spacing: viewModel.isCompactMode ? 6 : 10) {
-                    // 1. Gemini Group
-                    if let gemini = viewModel.geminiGroup {
+                    ForEach(Array(viewModel.groups.enumerated()), id: \.element.id) { index, group in
                         if viewModel.isCompactMode {
-                            QuotaGroupCompactCardView(group: gemini, currentNow: viewModel.currentNow, language: localization.currentLanguage)
+                            QuotaGroupCompactCardView(group: group, groupIndex: index, currentNow: viewModel.currentNow, language: localization.currentLanguage)
                         } else {
-                            QuotaGroupCardView(group: gemini, currentNow: viewModel.currentNow, language: localization.currentLanguage)
-                        }
-                    }
-                    
-                    // 2. Claude & GPT Group
-                    if let claudeGpt = viewModel.claudeGptGroup {
-                        if viewModel.isCompactMode {
-                            QuotaGroupCompactCardView(group: claudeGpt, currentNow: viewModel.currentNow, language: localization.currentLanguage)
-                        } else {
-                            QuotaGroupCardView(group: claudeGpt, currentNow: viewModel.currentNow, language: localization.currentLanguage)
-                        }
-                    }
-                    
-                    // Any additional groups
-                    ForEach(viewModel.groups.filter {
-                        $0.id != viewModel.geminiGroup?.id &&
-                        $0.id != viewModel.claudeGptGroup?.id
-                    }) { otherGroup in
-                        if viewModel.isCompactMode {
-                            QuotaGroupCompactCardView(group: otherGroup, currentNow: viewModel.currentNow, language: localization.currentLanguage)
-                        } else {
-                            QuotaGroupCardView(group: otherGroup, currentNow: viewModel.currentNow, language: localization.currentLanguage)
+                            QuotaGroupCardView(group: group, groupIndex: index, currentNow: viewModel.currentNow, language: localization.currentLanguage)
                         }
                     }
                 }

@@ -35,12 +35,92 @@ public struct QuotaGroup: Codable, Identifiable {
     
     /// Finds the 5-hour window bucket if available.
     public var fiveHourBucket: QuotaBucket? {
-        buckets.first(where: { $0.window == "5h" || $0.bucketId.contains("5h") })
+        buckets.first(where: { $0.isFiveHourWindow })
     }
     
     /// Finds the weekly window bucket if available.
     public var weeklyBucket: QuotaBucket? {
-        buckets.first(where: { $0.window == "weekly" || $0.bucketId.contains("weekly") })
+        buckets.first(where: { $0.isWeeklyWindow })
+    }
+    
+    /// Returns the primary bucket for summary/compact displays (5-hour preferred, otherwise first bucket).
+    public var primaryBucket: QuotaBucket? {
+        fiveHourBucket ?? buckets.first
+    }
+    
+    /// Returns buckets ordered with 5-hour windows first, followed by weekly windows, then any others.
+    public var orderedBuckets: [QuotaBucket] {
+        let fiveHour = buckets.filter { $0.isFiveHourWindow }
+        let weekly = buckets.filter { !$0.isFiveHourWindow && $0.isWeeklyWindow }
+        let others = buckets.filter { !$0.isFiveHourWindow && !$0.isWeeklyWindow }
+        return fiveHour + weekly + others
+    }
+    
+    /// Derives a concise display name without hardcoding model names.
+    public var shortDisplayName: String {
+        var name = displayName.replacingOccurrences(of: " and ", with: " & ")
+        for suffix in [" Models", " models"] {
+            if name.hasSuffix(suffix) {
+                name = String(name.dropLast(suffix.count))
+                break
+            }
+        }
+        return name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    
+    /// Computes unique short abbreviations for a list of groups dynamically from their display names.
+    public static func dynamicAbbreviations(for groups: [QuotaGroup]) -> [String: String] {
+        let ignoredWords: Set<String> = ["models", "model", "and", "&", "quota", "limit"]
+        var used: Set<String> = []
+        var result: [String: String] = [:]
+        
+        for group in groups {
+            let words = group.displayName
+                .components(separatedBy: CharacterSet.alphanumerics.inverted)
+                .filter { !$0.isEmpty }
+            let significant = words.filter { word in
+                let lower = word.lowercased()
+                return !ignoredWords.contains(lower) && word.rangeOfCharacter(from: .letters) != nil
+            }
+            
+            var chosen: String?
+            if let first = significant.first, let ch = first.first {
+                let candidate = String(ch).uppercased()
+                if !used.contains(candidate) {
+                    chosen = candidate
+                }
+            }
+            
+            if chosen == nil, let last = significant.last, let ch = last.first {
+                let candidate = String(ch).uppercased()
+                if !used.contains(candidate) {
+                    chosen = candidate
+                }
+            }
+            
+            if chosen == nil {
+                for word in significant.reversed() {
+                    if let ch = word.first {
+                        let candidate = String(ch).uppercased()
+                        if !used.contains(candidate) {
+                            chosen = candidate
+                            break
+                        }
+                    }
+                }
+            }
+            
+            if chosen == nil, let first = significant.first {
+                let two = String(first.prefix(2)).uppercased()
+                chosen = two
+            }
+            
+            let finalAbbr = chosen ?? String(group.displayName.prefix(1)).uppercased()
+            used.insert(finalAbbr)
+            result[group.id] = finalAbbr
+        }
+        
+        return result
     }
 }
 
@@ -68,6 +148,24 @@ public struct QuotaBucket: Codable, Identifiable {
         self.window = window
         self.remainingFraction = remainingFraction
         self.resetTime = resetTime
+    }
+    
+    public var isFiveHourWindow: Bool {
+        window == "5h" || bucketId.lowercased().contains("5h")
+    }
+    
+    public var isWeeklyWindow: Bool {
+        window == "weekly" || bucketId.lowercased().contains("week")
+    }
+    
+    /// Returns a localized window title (short or full) based on the bucket window type.
+    public func localizedWindowTitle(for language: AppLanguage, short: Bool) -> String {
+        if isFiveHourWindow {
+            return (short ? LocalizedStringKey.fiveHourShort : LocalizedStringKey.fiveHourResetTitle).string(for: language)
+        } else if isWeeklyWindow {
+            return (short ? LocalizedStringKey.weeklyShort : LocalizedStringKey.weeklyResetTitle).string(for: language)
+        }
+        return window ?? displayName
     }
     
     /// Remaining percentage clamped between 0% and 100%.

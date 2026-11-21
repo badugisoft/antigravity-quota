@@ -55,11 +55,11 @@
 ## Features
 
 - **Real-Time Quota Monitoring**:
-  - Displays remaining percentages and usage for both **Gemini Models** and **Claude / GPT Models**.
-  - Monitors both **5-Hour rolling limits** and **Weekly quota limits**.
+  - Dynamically discovers and displays all quota groups and buckets returned by Antigravity (e.g., **Gemini Models**, **Claude / GPT**, **Gemini 4 Argon**, and future model groups).
+  - Monitors both **5-Hour rolling limits** and **Weekly quota limits** across all active groups.
 - **macOS Desktop & Notification Center Widgets (WidgetKit)**:
-  - **Small Widget (`systemSmall` / 1x1)**: Minimalist overview with Gemini and Claude quota progress bars, remaining %, online indicator, and shortest reset countdown.
-  - **Medium Widget (`systemMedium` / 1x2)**: Two-column card comparing Gemini and Claude/GPT side-by-side with 5-Hour and Weekly limits, countdown clocks, and live status badge.
+  - **Small Widget (`systemSmall` / 1x1)**: Minimalist overview dynamically displaying all active model groups with progress bars, remaining %, online indicator, and shortest reset countdown.
+  - **Medium Widget (`systemMedium` / 1x2)**: Two-column card displaying primary model groups side-by-side plus a compact bottom row for additional groups (such as Gemini 4 Argon), with countdown clocks and live status badge.
   - **Native Frosted Glass Material**: Styled with `.regularMaterial` and borderless integration (`.contentMarginsDisabled()`) to seamlessly match macOS system widgets and wallpaper tinting in both Dark and Light modes.
   - Real-time synchronization powered by `QuotaDataStore` and instant `WidgetCenter.reloadAllTimelines()` triggers whenever quota updates.
   - Fully supports macOS Dark Mode and all 7 localized languages.
