@@ -123,6 +123,11 @@ Sources/
   - Menu bar summary abbreviations are generated dynamically via `QuotaGroup.dynamicAbbreviations(for:)`.
   - Popover cards (`MenuBarPopoverView`, `QuotaGroupCardView`, `QuotaGroupCompactCardView`), widgets (`SmallQuotaWidgetView`, `MediumQuotaWidgetView`), and Settings (`AppSettings.menuBarGaugeBucketId` + `QuotaSnapshot.resolveGaugeBucket`) iterate `groups` and `group.orderedBuckets` directly so newly added or renamed server groups work without code changes.
 
+### J. Dynamic Popover Sizing & Screen Boundary Clamping
+- **Avoid Hardcoded Popover Heights**:
+  - `MenuBarPopoverView` uses `.fixedSize(horizontal: false, vertical: true)` and `AppDelegate` configures `NSHostingController` with `sizingOptions = [.intrinsicContentSize]`.
+  - `updatePopoverSize()` measures `fittingSize.height`, caps it within `screen.visibleFrame.height`, and clamps the popover window's `maxY` via `clampPopoverWindowToScreen()` so resizing never pushes the window upward past the menu bar or top screen edge.
+
 ---
 
 ## 4. Common Commands

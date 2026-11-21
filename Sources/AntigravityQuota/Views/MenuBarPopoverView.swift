@@ -209,6 +209,7 @@ public struct MenuBarPopoverView: View {
         }
         .padding(12)
         .frame(width: 340)
+        .fixedSize(horizontal: false, vertical: true)
         .environment(\.locale, localization.currentLanguage.locale)
     }
 }

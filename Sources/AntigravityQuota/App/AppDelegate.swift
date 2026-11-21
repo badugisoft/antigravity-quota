@@ -9,17 +9,12 @@ import AntigravityQuotaCore
 public final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var popover: NSPopover!
+    private var hostingController: NSHostingController<MenuBarPopoverView>!
     private var viewModel: QuotaViewModel!
     private var cancellables = Set<AnyCancellable>()
     private var eventMonitor: Any?
     
-    private var standardSize: NSSize {
-        NSSize(width: 340, height: 470)
-    }
-    
-    private var compactSize: NSSize {
-        NSSize(width: 340, height: 275)
-    }
+    private let popoverWidth: CGFloat = 340
     
     public func applicationDidFinishLaunching(_ notification: Notification) {
         viewModel = QuotaViewModel()
@@ -33,12 +28,15 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func setupPopover() {
-        popover = NSPopover()
-        popover.contentSize = viewModel.isCompactMode ? compactSize : standardSize
-        popover.behavior = .transient
-        popover.contentViewController = NSHostingController(
+        hostingController = NSHostingController(
             rootView: MenuBarPopoverView(viewModel: viewModel)
         )
+        hostingController.sizingOptions = [.intrinsicContentSize]
+        
+        popover = NSPopover()
+        popover.behavior = .transient
+        popover.contentViewController = hostingController
+        updatePopoverSize()
     }
     
     private func setupStatusItem() {
@@ -81,17 +79,17 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         .store(in: &cancellables)
             
-        viewModel.$isCompactMode
-            .receive(on: RunLoop.main)
-            .sink { [weak self] isCompact in
-                guard let self = self else { return }
-                let targetSize = isCompact ? self.compactSize : self.standardSize
-                self.popover.contentSize = targetSize
-                if self.popover.isShown {
-                    self.configurePopoverWindowVibrancy()
-                }
-            }
-            .store(in: &cancellables)
+        Publishers.Merge4(
+            viewModel.$isCompactMode.map { _ in () }.eraseToAnyPublisher(),
+            viewModel.$groups.map { _ in () }.eraseToAnyPublisher(),
+            viewModel.$isServerOnline.map { _ in () }.eraseToAnyPublisher(),
+            viewModel.localization.$currentLanguage.map { _ in () }.eraseToAnyPublisher()
+        )
+        .receive(on: RunLoop.main)
+        .sink { [weak self] _ in
+            self?.updatePopoverSize()
+        }
+        .store(in: &cancellables)
     }
     
     @objc public func openSettings(_ sender: AnyObject?) {
@@ -109,8 +107,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
     private func showPopover(_ sender: AnyObject?) {
         guard let button = statusItem.button else { return }
         
-        // Ensure popover content size matches current mode
-        popover.contentSize = viewModel.isCompactMode ? compactSize : standardSize
+        updatePopoverSize()
         
         // Refresh quota immediately upon opening the popover
         Task {
@@ -118,6 +115,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        clampPopoverWindowToScreen()
         configurePopoverWindowVibrancy()
         
         // Monitor global clicks outside the popover to dismiss
@@ -125,6 +123,51 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
             Task { @MainActor in
                 self?.closePopover(event)
             }
+        }
+    }
+    
+    /// Recomputes popover content size from SwiftUI fitting size and keeps the window below the menu bar.
+    private func updatePopoverSize() {
+        guard let hostingView = hostingController?.view else { return }
+        let previousMaxY = popover.isShown ? hostingView.window?.frame.maxY : nil
+        
+        hostingView.invalidateIntrinsicContentSize()
+        hostingView.layoutSubtreeIfNeeded()
+        
+        let targetScreen = statusItem?.button?.window?.screen ?? NSScreen.main
+        let maxAllowedHeight = max(200, (targetScreen?.visibleFrame.height ?? 800) - 24)
+        let fittingHeight = hostingView.fittingSize.height
+        let fallbackHeight: CGFloat = viewModel.isCompactMode ? 275 : 470
+        let resolvedHeight = min(maxAllowedHeight, max(160, fittingHeight > 1 ? fittingHeight : fallbackHeight))
+        let targetSize = NSSize(width: popoverWidth, height: resolvedHeight)
+        
+        if popover.contentSize != targetSize {
+            popover.contentSize = targetSize
+        }
+        
+        if popover.isShown {
+            clampPopoverWindowToScreen(preferredMaxY: previousMaxY)
+            configurePopoverWindowVibrancy()
+        }
+    }
+    
+    /// Prevents the popover window from expanding upward past the visible screen top when resizing.
+    private func clampPopoverWindowToScreen(preferredMaxY: CGFloat? = nil) {
+        guard popover.isShown, let window = popover.contentViewController?.view.window else { return }
+        let targetScreen = statusItem?.button?.window?.screen ?? window.screen ?? NSScreen.main
+        guard let visibleFrame = targetScreen?.visibleFrame else { return }
+        
+        var frame = window.frame
+        let topBoundary = min(preferredMaxY ?? visibleFrame.maxY, visibleFrame.maxY)
+        
+        if frame.maxY > topBoundary {
+            frame.origin.y -= (frame.maxY - topBoundary)
+        }
+        if frame.minY < visibleFrame.minY {
+            frame.origin.y = visibleFrame.minY
+        }
+        if frame != window.frame {
+            window.setFrame(frame, display: true)
         }
     }
     
