@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-11-23
+
 ### Added
 - Developer ID code signing (Hardened Runtime) and Apple notarization/stapling in release builds (`scripts/build_app.sh`, `scripts/package_release.sh`, `.github/workflows/release.yml`).
 - Automatic local Developer ID certificate detection in `scripts/build_app.sh` with ad-hoc (`-`) fallback when no certificate is present.
@@ -16,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Updated documentation (`README.md`, `docs/README.*.md`, `CONTRIBUTING.md`, `AGENTS.md`, `site/`) to reflect Apple Developer ID signing, notarization, and changelog workflow.
+- Updated default app version to `1.4.0`.
 
 ## [1.3.1] - 2026-11-21
 
@@ -85,7 +88,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multi-language support for 7 languages (`EN`, `KO`, `ZH`, `JA`, `DE`, `FR`, `ES`).
 - Automated GitHub Actions release workflow with `.dmg` and `.zip` packaging.
 
-[Unreleased]: https://github.com/badugisoft/antigravity-quota/compare/v1.3.1...HEAD
+[Unreleased]: https://github.com/badugisoft/antigravity-quota/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/badugisoft/antigravity-quota/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/badugisoft/antigravity-quota/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/badugisoft/antigravity-quota/compare/v1.2.3...v1.3.0
 [1.2.3]: https://github.com/badugisoft/antigravity-quota/compare/v1.2.2...v1.2.3
