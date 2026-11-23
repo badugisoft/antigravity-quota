@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Prevented the menu bar popover from remaining stuck open when focus moves or clicks occur during the opening animation, and ensured it closes cleanly when opening Settings (`AppDelegate`, `MenuBarPopoverView`).
+
 ## [1.4.0] - 2026-11-23
 
 ### Added

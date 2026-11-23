@@ -103,7 +103,7 @@ public struct MenuBarPopoverView: View {
                 
                 // Settings button
                 Button(action: {
-                    SettingsWindowController.shared.showSettings()
+                    (NSApp.delegate as? AppDelegate)?.openSettings(nil)
                 }) {
                     Image(systemName: "gearshape")
                         .font(.system(size: 11))

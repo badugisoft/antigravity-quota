@@ -6,13 +6,17 @@ import AntigravityQuotaCore
 
 /// NSApplicationDelegate configuring the NSStatusItem, popover lifecycle, and event monitoring.
 @MainActor
-public final class AppDelegate: NSObject, NSApplicationDelegate {
+public final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private var statusItem: NSStatusItem!
     private var popover: NSPopover!
     private var hostingController: NSHostingController<MenuBarPopoverView>!
     private var viewModel: QuotaViewModel!
     private var cancellables = Set<AnyCancellable>()
-    private var eventMonitor: Any?
+    private var globalEventMonitor: Any?
+    private var localEventMonitor: Any?
+    private var isPopoverOpening = false
+    private var hasPendingClose = false
+    private var pendingCloseSender: AnyObject?
     
     private let popoverWidth: CGFloat = 340
     
@@ -34,7 +38,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
         hostingController.sizingOptions = [.intrinsicContentSize]
         
         popover = NSPopover()
-        popover.behavior = .transient
+        popover.behavior = .applicationDefined
+        popover.delegate = self
         popover.contentViewController = hostingController
         updatePopoverSize()
     }
@@ -93,6 +98,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc public func openSettings(_ sender: AnyObject?) {
+        if popover.isShown {
+            closePopover(sender)
+        }
         SettingsWindowController.shared.showSettings()
     }
     
@@ -114,15 +122,29 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
             await viewModel.refresh()
         }
         
+        isPopoverOpening = true
+        hasPendingClose = false
+        pendingCloseSender = nil
+        
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         clampPopoverWindowToScreen()
         configurePopoverWindowVibrancy()
         
-        // Monitor global clicks outside the popover to dismiss
-        eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+        // Monitor clicks outside the popover to dismiss
+        removeEventMonitors()
+        globalEventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
             Task { @MainActor in
                 self?.closePopover(event)
             }
+        }
+        localEventMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+            guard let self else { return event }
+            let popoverWindow = self.popover.contentViewController?.view.window
+            let statusWindow = self.statusItem.button?.window
+            if event.window !== popoverWindow && event.window !== statusWindow {
+                self.closePopover(event)
+            }
+            return event
         }
     }
     
@@ -171,10 +193,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    /// Ensures popover window is key and its visual effect views are active to keep transparency consistent.
+    /// Ensures visual effect views remain active to keep popover transparency consistent.
     private func configurePopoverWindowVibrancy() {
         guard popover.isShown, let window = popover.contentViewController?.view.window else { return }
-        window.makeKeyAndOrderFront(nil)
         
         func activateVisualEffectViews(in view: NSView) {
             if let vev = view as? NSVisualEffectView {
@@ -191,10 +212,46 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func closePopover(_ sender: AnyObject?) {
-        popover.performClose(sender)
-        if let monitor = eventMonitor {
-            NSEvent.removeMonitor(monitor)
-            eventMonitor = nil
+        if isPopoverOpening {
+            hasPendingClose = true
+            pendingCloseSender = sender
+            return
         }
+        popover.performClose(sender)
+        removeEventMonitors()
+    }
+    
+    private func removeEventMonitors() {
+        if let monitor = globalEventMonitor {
+            NSEvent.removeMonitor(monitor)
+            globalEventMonitor = nil
+        }
+        if let monitor = localEventMonitor {
+            NSEvent.removeMonitor(monitor)
+            localEventMonitor = nil
+        }
+    }
+    
+    public func popoverWillShow(_ notification: Notification) {
+        isPopoverOpening = true
+    }
+    
+    public func popoverDidShow(_ notification: Notification) {
+        isPopoverOpening = false
+        if hasPendingClose {
+            let sender = pendingCloseSender
+            hasPendingClose = false
+            pendingCloseSender = nil
+            DispatchQueue.main.async { [weak self] in
+                self?.closePopover(sender)
+            }
+        }
+    }
+    
+    public func popoverDidClose(_ notification: Notification) {
+        isPopoverOpening = false
+        hasPendingClose = false
+        pendingCloseSender = nil
+        removeEventMonitors()
     }
 }
