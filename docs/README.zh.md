@@ -162,13 +162,8 @@ Antigravity 会在本地临时 TCP 端口上运行内部语言服务器守护进
 
 1. 下载 **`Antigravity-Quota-<version>.dmg`** 并打开。
 2. 将 **Antigravity Quota.app** 拖入 **Applications（应用程序）** 文件夹。
-3. **首次启动（Gatekeeper 提示）**：
-   - 由于开源构建版本使用 ad-hoc 签名分发，macOS 可能会提示无法验证开发者。
-   - 在 `/Applications` 中 **右键点击** `Antigravity Quota.app`，选择 **打开**，并在弹窗中再次确认 **打开**。
-   - 或者在终端执行：
-     ```bash
-     xattr -cr "/Applications/Antigravity Quota.app"
-     ```
+3. 直接从 **Applications（应用程序）** 文件夹启动 **Antigravity Quota**（官方版本已通过 Apple **Developer ID** 签名并完成 **Apple 公证**，无 Gatekeeper 警告）。
+   > *（若安装 `v1.3.1` 及更早的旧版本，请右键点击应用 > **打开**，或运行 `xattr -cr "/Applications/Antigravity Quota.app"`。）*
 
 ### 2. 通过脚本从源码构建并安装
 
@@ -185,7 +180,7 @@ cd antigravity-quota
 1. 以 `Release` 模式编译所有目标（`swift build -c release`）。
 2. 打包主应用（`Antigravity Quota.app`）并嵌入 WidgetKit 扩展（`Contents/PlugIns/AntigravityQuotaWidget.appex`）。
 3. 写入高分辨率应用图标（`AppIcon.icns`）及启用 `LSUIElement=true` 的 `Info.plist`。
-4. 由内而外对扩展和主应用包执行 ad-hoc 代码签名。
+4. 由内而外对扩展和主应用包执行代码签名（若本地存在 Developer ID 证书则自动使用，否则回退为 ad-hoc 签名）。
 5. 自动安装至 `/Applications/Antigravity Quota.app`。
 6. 自动启动菜单栏应用。
 
@@ -215,7 +210,7 @@ swift build -c release
 <details>
 <summary><strong>macOS 提示“无法打开 Antigravity Quota，因为无法验证开发者”</strong></summary>
 
-由于本开源版本采用 ad-hoc 签名，未附带付费 Apple Developer 公证证书，macOS Gatekeeper 默认会拦截首次运行。请在 `/Applications` 中 **右键点击** `Antigravity Quota.app`，选择 **打开** 并再次确认，或在终端中运行：
+当前官方版本（`v1.4.0+`）已使用 Apple Developer ID 证书签名并通过 Apple 公证，可直接打开而无 Gatekeeper 拦截。若您运行的是本地 ad-hoc 构建版本或旧版本（`v1.3.1` 及更早），请在 `/Applications` 中 **右键点击** `Antigravity Quota.app`，选择 **打开** 并再次确认，或在终端中运行：
 
 ```bash
 xattr -cr "/Applications/Antigravity Quota.app"

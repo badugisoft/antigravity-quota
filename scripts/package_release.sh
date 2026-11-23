@@ -27,6 +27,28 @@ fi
 ZIP_NAME="Antigravity-Quota-${VERSION}.zip"
 DMG_NAME="Antigravity-Quota-${VERSION}.dmg"
 
+SHOULD_NOTARIZE=0
+if [ -n "${APPLE_ID:-}" ] && [ -n "${APPLE_TEAM_ID:-}" ] && [ -n "${APPLE_APP_PASSWORD:-}" ]; then
+    SHOULD_NOTARIZE=1
+fi
+
+if [ "$SHOULD_NOTARIZE" -eq 1 ]; then
+    echo "==> Notarizing app bundle with Apple Notary Service..."
+    NOTARIZE_ZIP="$BUILD_DIR/Antigravity-Quota-${VERSION}-notarize.zip"
+    rm -f "$NOTARIZE_ZIP"
+    cd "$BUILD_DIR"
+    ditto -c -k --keepParent "$APP_NAME" "$NOTARIZE_ZIP"
+    xcrun notarytool submit "$NOTARIZE_ZIP" \
+        --apple-id "$APPLE_ID" \
+        --team-id "$APPLE_TEAM_ID" \
+        --password "$APPLE_APP_PASSWORD" \
+        --wait
+    rm -f "$NOTARIZE_ZIP"
+
+    echo "==> Stapling notarization ticket to $APP_NAME..."
+    xcrun stapler staple "$APP_DIR"
+fi
+
 echo "==> Creating ZIP archive: $ZIP_NAME..."
 rm -f "$BUILD_DIR/$ZIP_NAME"
 cd "$BUILD_DIR"
@@ -47,6 +69,27 @@ hdiutil create -volname "Antigravity Quota" \
   "$BUILD_DIR/$DMG_NAME"
 
 rm -rf "$DMG_STAGING"
+
+if [ -z "${SIGN_IDENTITY:-}" ]; then
+    SIGN_IDENTITY="$(security find-identity -v -p codesigning 2>/dev/null | grep "Developer ID Application:" | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/' || true)"
+fi
+
+if [ -n "$SIGN_IDENTITY" ] && [ "$SIGN_IDENTITY" != "-" ]; then
+    echo "==> Code signing DMG disk image..."
+    codesign --force --timestamp --sign "$SIGN_IDENTITY" "$BUILD_DIR/$DMG_NAME"
+fi
+
+if [ "$SHOULD_NOTARIZE" -eq 1 ]; then
+    echo "==> Notarizing DMG disk image..."
+    xcrun notarytool submit "$BUILD_DIR/$DMG_NAME" \
+        --apple-id "$APPLE_ID" \
+        --team-id "$APPLE_TEAM_ID" \
+        --password "$APPLE_APP_PASSWORD" \
+        --wait
+
+    echo "==> Stapling notarization ticket to $DMG_NAME..."
+    xcrun stapler staple "$BUILD_DIR/$DMG_NAME"
+fi
 
 echo "==> Release packaging complete!"
 echo "    - ZIP: $BUILD_DIR/$ZIP_NAME"

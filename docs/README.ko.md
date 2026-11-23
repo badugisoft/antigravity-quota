@@ -162,13 +162,8 @@ Antigravity는 임시 로컬 TCP 포트에서 대기하는 내부 언어 서버 
 
 1. **`Antigravity-Quota-<version>.dmg`** 파일을 내려받아 엽니다.
 2. **Antigravity Quota.app**을 **Applications(응용 프로그램)** 폴더로 드래그합니다.
-3. **최초 실행 (Gatekeeper 안내)**:
-   - 오픈소스 빌드는 ad-hoc 서명으로 배포되므로 macOS에서 확인되지 않은 개발자 경고가 표시될 수 있습니다.
-   - `/Applications`의 `Antigravity Quota.app`을 **우클릭 > 열기** 후 **열기**를 클릭해 실행합니다.
-   - 또는 터미널에서 아래 명령어를 실행합니다:
-     ```bash
-     xattr -cr "/Applications/Antigravity Quota.app"
-     ```
+3. **Applications(응용 프로그램)**에서 **Antigravity Quota**를 바로 실행합니다(공식 릴리즈는 Apple **Developer ID** 서명 및 **Apple 공증**이 완료되어 Gatekeeper 경고 없이 실행됩니다).
+   > *(구버전 `v1.3.1` 이하를 사용하는 경우 앱 우클릭 > **열기** 또는 `xattr -cr "/Applications/Antigravity Quota.app"` 실행)*
 
 ### 2. 스크립트로 소스 빌드 및 설치
 
@@ -185,7 +180,7 @@ cd antigravity-quota
 1. 모든 타겟을 `Release` 모드로 컴파일(`swift build -c release`).
 2. 메인 앱(`Antigravity Quota.app`)을 패키징하고 WidgetKit 익스텐션(`Contents/PlugIns/AntigravityQuotaWidget.appex`)을 번들에 포함.
 3. 고해상도 아이콘(`AppIcon.icns`) 삽입 및 `LSUIElement=true`가 설정된 `Info.plist` 구성.
-4. 익스텐션과 메인 앱 번들에 Inside-Out 방식의 ad-hoc 코드 서명 적용.
+4. 익스텐션과 메인 앱 번들에 Inside-Out 방식의 코드 서명 적용 (로컬 Developer ID 인증서가 있으면 자동 사용하고, 없으면 ad-hoc 서명으로 폴백).
 5. `/Applications/Antigravity Quota.app`으로 설치.
 6. 메뉴바 앱 자동 실행.
 
@@ -215,7 +210,7 @@ swift build -c release
 <details>
 <summary><strong>macOS에서 "확인되지 않은 개발자" 경고가 뜨며 열리지 않습니다</strong></summary>
 
-이 오픈소스 릴리스는 유료 Apple Developer 공증 인증서 대신 ad-hoc 코드 서명을 사용하므로 macOS Gatekeeper가 첫 실행을 차단할 수 있습니다. `/Applications`에서 `Antigravity Quota.app`을 **우클릭 > 열기** 후 **열기**를 클릭하거나, 터미널에서 아래 명령어를 실행하세요:
+최신 공식 릴리즈(`v1.4.0+`)는 Apple Developer ID 인증서로 서명되고 Apple 공증을 받아 Gatekeeper 경고 없이 바로 실행됩니다. 직접 빌드한 ad-hoc 바이너리나 구버전(`v1.3.1` 이하)을 실행하는 경우 `/Applications`에서 `Antigravity Quota.app`을 **우클릭 > 열기** 후 **열기**를 클릭하거나, 터미널에서 아래 명령어를 실행하세요:
 
 ```bash
 xattr -cr "/Applications/Antigravity Quota.app"

@@ -275,12 +275,8 @@
             <ol class="install-steps">
               <li data-i18n="inst_dmg_1">Download the latest <code>Antigravity-Quota-&lt;version&gt;.dmg</code> from GitHub Releases.</li>
               <li data-i18n="inst_dmg_2">Drag <strong>Antigravity Quota.app</strong> into your <strong>Applications</strong> folder.</li>
-              <li data-i18n="inst_dmg_3">On first launch, right-click the app and choose <strong>Open</strong>, or run the command below to clear Gatekeeper quarantine:</li>
+              <li data-i18n="inst_dmg_3">Launch <strong>Antigravity Quota</strong> directly from Applications (signed with Apple Developer ID and notarized).</li>
             </ol>
-            <div class="code-box">
-              <code id="cmd-xattr">xattr -cr "/Applications/Antigravity Quota.app"</code>
-              <button type="button" class="copy-btn" data-copy-target="cmd-xattr" data-i18n="btn_copy">Copy</button>
-            </div>
             <a class="btn btn-primary" href="https://github.com/badugisoft/antigravity-quota/releases/latest" target="_blank" rel="noopener noreferrer" data-i18n="inst_dmg_btn">
               Download Latest Release
             </a>
@@ -308,7 +304,7 @@
           <details>
             <summary data-i18n="faq_1_q">macOS says "Antigravity Quota" cannot be opened because the developer cannot be verified</summary>
             <div class="details-body">
-              <p data-i18n="faq_1_a">This open-source build uses ad-hoc code signing without a paid Apple Developer notarization certificate. Right-click Antigravity Quota.app in /Applications, select Open, and confirm—or run <code>xattr -cr "/Applications/Antigravity Quota.app"</code> in Terminal.</p>
+              <p data-i18n="faq_1_a">Current official releases (v1.4.0+) are signed with an Apple Developer ID certificate and notarized by Apple, so they open without Gatekeeper warnings. For older historical releases (v1.3.1 and earlier) or self-built ad-hoc binaries, right-click Antigravity Quota.app in /Applications, select Open, and confirm—or run <code>xattr -cr "/Applications/Antigravity Quota.app"</code> in Terminal.</p>
             </div>
           </details>
 
@@ -350,6 +346,7 @@
       <div class="footer-links">
         <a href="https://github.com/badugisoft/antigravity-quota" target="_blank" rel="noopener noreferrer">Repository</a>
         <a href="https://github.com/badugisoft/antigravity-quota/releases" target="_blank" rel="noopener noreferrer">Releases</a>
+        <a href="https://github.com/badugisoft/antigravity-quota/blob/main/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Changelog</a>
         <a href="https://github.com/badugisoft/antigravity-quota/issues" target="_blank" rel="noopener noreferrer">Issues</a>
         <a href="https://github.com/badugisoft/antigravity-quota/blob/main/SECURITY.md" target="_blank" rel="noopener noreferrer">Security</a>
       </div>
@@ -357,5 +354,6 @@
   </footer>
 
   <script src="i18n.js"></script>
+  <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a9b0a6d79f624564bb0a40d5e89648f8"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

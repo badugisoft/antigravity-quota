@@ -30,8 +30,8 @@ GENERATE_SCREENSHOTS=1 swift test
 - **Zero External Dependencies**: The project strictly uses pure Swift, SwiftUI, AppKit, and WidgetKit (`Package.swift` must remain dependency-free).
 - **Dynamic Server-Driven UI**: Avoid hardcoding model names or fixed quota group enums. All menu bar abbreviations, popover cards, widgets, and settings dynamically iterate server-provided groups and buckets.
 - **Multi-Language Support (7 Languages)**: Keep all user-facing strings localized across all 7 supported dictionaries in `Sources/AntigravityQuotaCore/Services/Localization/` (`EN`, `KO`, `ZH`, `JA`, `DE`, `FR`, `ES`) and verified by tests.
-- **Documentation Sync**: When adding features or changing UI/behavior, update both the root [README.md](README.md) and all localized guides in `docs/README.<lang>.md` (`ko`, `zh`, `ja`, `de`, `fr`, `es`), as well as [AGENTS.md](AGENTS.md) if architectural rules change.
-- **Codesigning & Sandbox Rules**: Never use `codesign --deep`; always sign `AntigravityQuotaWidget.appex` before the host bundle (`./scripts/build_app.sh` handles this automatically).
+- **Documentation & Changelog Sync**: When adding features or changing UI/behavior, update [CHANGELOG.md](CHANGELOG.md) under `## [Unreleased]`, both the root [README.md](README.md) and all localized guides in `docs/README.<lang>.md` (`ko`, `zh`, `ja`, `de`, `fr`, `es`), as well as [AGENTS.md](AGENTS.md) if architectural rules change.
+- **Codesigning & Sandbox Rules**: Never use `codesign --deep`; always sign `AntigravityQuotaWidget.appex` before the host bundle (`./scripts/build_app.sh` handles this automatically, using a local `Developer ID Application` certificate with Hardened Runtime when present or falling back to ad-hoc signing).
 
 ## Submitting a Pull Request
 

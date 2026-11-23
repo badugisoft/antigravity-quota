@@ -141,12 +141,40 @@ if [ -f "$WIDGET_BIN_PATH" ]; then
 </dict>
 </plist>
 EOF
+    echo "==> Code signing setup..."
+    if [ -z "${SIGN_IDENTITY:-}" ]; then
+        SIGN_IDENTITY="$(security find-identity -v -p codesigning 2>/dev/null | grep "Developer ID Application:" | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/' || true)"
+    fi
+
+    if [ -n "$SIGN_IDENTITY" ]; then
+        echo "==> Using signing identity: $SIGN_IDENTITY (Hardened Runtime)"
+        CODESIGN_ARGS=(--force --options runtime --timestamp --sign "$SIGN_IDENTITY")
+    else
+        echo "==> No Developer ID certificate found; using ad-hoc signing (-)"
+        CODESIGN_ARGS=(--force --sign -)
+    fi
+
     echo "==> Code signing widget extension with sandboxed entitlements..."
-    codesign --force --sign - --entitlements "$ROOT_DIR/scripts/entitlements/widget.entitlements" "$WIDGET_APPEX_DIR"
+    codesign "${CODESIGN_ARGS[@]}" --entitlements "$ROOT_DIR/scripts/entitlements/widget.entitlements" "$WIDGET_APPEX_DIR"
+fi
+
+if [ -z "${CODESIGN_ARGS+x}" ]; then
+    if [ -z "${SIGN_IDENTITY:-}" ]; then
+        SIGN_IDENTITY="$(security find-identity -v -p codesigning 2>/dev/null | grep "Developer ID Application:" | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/' || true)"
+    fi
+
+    if [ -n "$SIGN_IDENTITY" ]; then
+        echo "==> Using signing identity: $SIGN_IDENTITY (Hardened Runtime)"
+        CODESIGN_ARGS=(--force --options runtime --timestamp --sign "$SIGN_IDENTITY")
+    else
+        echo "==> No Developer ID certificate found; using ad-hoc signing (-)"
+        CODESIGN_ARGS=(--force --sign -)
+    fi
 fi
 
 echo "==> Code signing main app bundle..."
-codesign --force --sign - --entitlements "$ROOT_DIR/scripts/entitlements/app.entitlements" "$APP_DIR"
+codesign "${CODESIGN_ARGS[@]}" --entitlements "$ROOT_DIR/scripts/entitlements/app.entitlements" "$APP_DIR"
+codesign --verify --strict --verbose=2 "$APP_DIR"
 
 echo "==> Done! App bundle created at: $APP_DIR"
 

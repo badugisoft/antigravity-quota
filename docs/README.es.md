@@ -162,13 +162,8 @@ Descarga la última imagen de disco desde [GitHub Releases](https://github.com/b
 
 1. Descarga **`Antigravity-Quota-<version>.dmg`** y ábrelo.
 2. Arrastra **Antigravity Quota.app** a la carpeta **Aplicaciones (Applications)**.
-3. **Primer inicio (Gatekeeper)**:
-   - Dado que esta compilación de código abierto se distribuye con firma ad-hoc, macOS puede mostrar un aviso de desarrollador no verificado.
-   - Haz **clic derecho** en `Antigravity Quota.app` dentro de `/Applications`, pulsa **Abrir** y vuelve a confirmar con **Abrir**.
-   - O ejecuta en Terminal:
-     ```bash
-     xattr -cr "/Applications/Antigravity Quota.app"
-     ```
+3. Abre **Antigravity Quota** directamente desde **Aplicaciones** (las versiones oficiales están firmadas con Apple **Developer ID** y **notarizadas por Apple**).
+   > *(Para versiones anteriores `v1.3.1` y previas, haz clic derecho > **Abrir**, o ejecuta `xattr -cr "/Applications/Antigravity Quota.app"`.)*
 
 ### 2. Compilar e instalar mediante script desde el código fuente
 
@@ -185,7 +180,7 @@ El script realizará automáticamente los siguientes pasos:
 1. Compilar todos los objetivos en modo `Release` (`swift build -c release`).
 2. Empaquetar la aplicación principal (`Antigravity Quota.app`) e incrustar la extensión WidgetKit (`Contents/PlugIns/AntigravityQuotaWidget.appex`).
 3. Incrustar los iconos de alta resolución (`AppIcon.icns`) y configurar `Info.plist` con `LSUIElement=true`.
-4. Firmar ad-hoc tanto la extensión como el paquete principal de dentro hacia fuera.
+4. Firmar tanto la extensión como el paquete principal de dentro hacia fuera (usando un certificado Developer ID local si existe, o firma ad-hoc como respaldo).
 5. Instalar directamente en `/Applications/Antigravity Quota.app`.
 6. Iniciar automáticamente la aplicación en la barra de menús.
 
@@ -215,7 +210,7 @@ Puedes activar **Abrir al iniciar sesión** directamente desde la app en **Ajust
 <details>
 <summary><strong>macOS indica que no puede abrir «Antigravity Quota» porque no se puede verificar al desarrollador</strong></summary>
 
-Como esta versión de código abierto utiliza firma ad-hoc sin certificado de notarización de pago de Apple Developer, Gatekeeper bloquea el primer inicio de forma predeterminada. Haz **clic derecho** en `Antigravity Quota.app` en `/Applications`, selecciona **Abrir** y confirma con **Abrir**, o ejecuta en Terminal:
+Las versiones oficiales actuales (`v1.4.0+`) están firmadas con un certificado Apple Developer ID y notarizadas por Apple, por lo que se abren sin avisos de Gatekeeper. Si usas una compilación ad-hoc local o una versión anterior (`v1.3.1` o previa), haz **clic derecho** en `Antigravity Quota.app` en `/Applications`, selecciona **Abrir** y confirma con **Abrir**, o ejecuta en Terminal:
 
 ```bash
 xattr -cr "/Applications/Antigravity Quota.app"

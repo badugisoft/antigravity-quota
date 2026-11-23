@@ -26,12 +26,18 @@ The repository is structured into three distinct Swift targets plus localized do
 
 ```
 README.md                          # Root English documentation
+CHANGELOG.md                       # Version history (Keep a Changelog)
 CONTRIBUTING.md                    # Contributor guidelines & development setup
 SECURITY.md                        # Privacy architecture & vulnerability reporting
+.agents/skills/                    # Project-specific agent workflow skills
 .github/
 ├── ISSUE_TEMPLATE/                # Bug report, feature request & chooser config
 ├── PULL_REQUEST_TEMPLATE.md       # PR review & test checklist
 └── workflows/                     # GitHub Actions (release.yml, pages.yml)
+scripts/
+├── build_app.sh                   # Build, inside-out codesign (Developer ID or ad-hoc), & install
+├── package_release.sh             # Package .zip/.dmg, Apple notarize & staple
+└── generate_release_notes.sh      # Extract CHANGELOG.md section & Full Changelog compare link
 docs/README.<lang>.md              # Localized documentation (ko, zh, ja, de, fr, es)
 site/                              # GitHub Pages promotional site (index.html, styles.css, i18n.js)
 assets/                            # App icon & generated documentation screenshots
@@ -66,9 +72,11 @@ Sources/
 ### B. WidgetKit Codesigning & PluginKit Registration
 - **Never use `codesign --deep`** on `Antigravity Quota.app`.
   - `--deep` overrides the inner `.appex` signature with the host app's entitlements, stripping the sandbox entitlement from the widget and causing macOS `pkd` / `chronod` to reject it.
-- **Inside-Out Signing**:
+- **Inside-Out Signing & Hardened Runtime**:
   1. Sign `AntigravityQuotaWidget.appex` first using `scripts/entitlements/widget.entitlements`.
   2. Sign the outer `Antigravity Quota.app` second using `scripts/entitlements/app.entitlements`.
+  3. `scripts/build_app.sh` automatically detects a local `Developer ID Application` certificate (signing with `--options runtime --timestamp` for notarization compatibility) and falls back to ad-hoc (`-`) when none is available.
+  4. `scripts/package_release.sh` notarizes and staples both the `.app` (for `.zip`) and `.dmg` when `APPLE_ID`, `APPLE_TEAM_ID`, and `APPLE_APP_PASSWORD` are provided (e.g. in `.github/workflows/release.yml`).
 - **Linker Entry Point for SwiftPM**:
   - `Package.swift` must maintain `.unsafeFlags(["-Xlinker", "-e", "-Xlinker", "_NSExtensionMain"])` for `AntigravityQuotaWidgetExtension` to properly register as an Apple extension.
 

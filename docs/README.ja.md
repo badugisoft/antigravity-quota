@@ -162,13 +162,8 @@ Antigravity はローカルの一時 TCP ポートで待機する内部言語サ
 
 1. **`Antigravity-Quota-<version>.dmg`** をダウンロードして開きます。
 2. **Antigravity Quota.app** を **Applications（アプリケーション）** フォルダにドラッグします。
-3. **初回起動（Gatekeeper）**:
-   - このオープンソースビルドはアドホック署名で配布されているため、初回起動時に未確認の開発元に関する警告が表示されることがあります。
-   - `/Applications` 内の `Antigravity Quota.app` を **右クリック > 開く** を選び、確認ダイアログで **開く** をクリックしてください。
-   - またはターミナルで次を実行します：
-     ```bash
-     xattr -cr "/Applications/Antigravity Quota.app"
-     ```
+3. **Applications（アプリケーション）** から **Antigravity Quota** をそのまま起動します（公式リリースは Apple **Developer ID** 署名および **Apple 公証**済みのため、Gatekeeper の警告なしで起動できます）。
+   > *（`v1.3.1` 以前の旧バージョンをご利用の場合は、アプリを右クリック > **開く**、または `xattr -cr "/Applications/Antigravity Quota.app"` を実行してください。）*
 
 ### 2. スクリプトでソースからビルド＆インストール
 
@@ -185,7 +180,7 @@ cd antigravity-quota
 1. すべてのターゲットを `Release` モードでコンパイル（`swift build -c release`）。
 2. メインアプリ（`Antigravity Quota.app`）をパッケージ化し、WidgetKit 拡張（`Contents/PlugIns/AntigravityQuotaWidget.appex`）を同梱。
 3. 高解像度アイコン（`AppIcon.icns`）を組み込み、`LSUIElement=true` を設定した `Info.plist` を生成。
-4. 拡張機能とメインアプリバンドルを内側からの順序（Inside-Out）でアドホック署名。
+4. 拡張機能とメインアプリバンドルを内側からの順序（Inside-Out）でコード署名（ローカルに Developer ID 証明書があれば自動使用し、ない場合はアドホック署名にフォールバック）。
 5. `/Applications/Antigravity Quota.app` へ自動インストール。
 6. メニューバーアプリを自動起動。
 
@@ -215,7 +210,7 @@ swift build -c release
 <details>
 <summary><strong>macOS で「開発元を検証できないため開けません」と表示されます</strong></summary>
 
-このオープンソースリリースは有料の Apple Developer 公証証明書を使用せずアドホック署名されているため、初回起動時に macOS Gatekeeper によってブロックされる場合があります。`/Applications` 内の `Antigravity Quota.app` を **右クリック > 開く** から **開く** を選択するか、ターミナルで次を実行してください：
+最新の公式リリース（`v1.4.0+`）は Apple Developer ID 証明書で署名され Apple の公証を受けているため、Gatekeeper にブロックされることなく起動できます。セルフビルドのアドホック版や旧リリース（`v1.3.1` 以前）をご利用の場合は、`/Applications` 内の `Antigravity Quota.app` を **右クリック > 開く** から **開く** を選択するか、ターミナルで次を実行してください：
 
 ```bash
 xattr -cr "/Applications/Antigravity Quota.app"
