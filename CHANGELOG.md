@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-11-23
+
 ### Fixed
 - Prevented the menu bar popover from remaining stuck open when focus moves or clicks occur during the opening animation, and ensured it closes cleanly when opening Settings (`AppDelegate`, `MenuBarPopoverView`).
 
@@ -91,7 +93,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multi-language support for 7 languages (`EN`, `KO`, `ZH`, `JA`, `DE`, `FR`, `ES`).
 - Automated GitHub Actions release workflow with `.dmg` and `.zip` packaging.
 
-[Unreleased]: https://github.com/badugisoft/antigravity-quota/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/badugisoft/antigravity-quota/compare/v1.4.1...HEAD
+[1.4.1]: https://github.com/badugisoft/antigravity-quota/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/badugisoft/antigravity-quota/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/badugisoft/antigravity-quota/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/badugisoft/antigravity-quota/compare/v1.2.3...v1.3.0
