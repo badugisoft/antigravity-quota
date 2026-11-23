@@ -6,7 +6,7 @@ Briefly describe what this pull request changes and why.
 
 ## Testing Performed
 - [ ] `swift test` passes locally
-- [ ] `./scripts/build_app.sh` builds, codesigns, and launches cleanly
+- [ ] `make build` builds, codesigns, and launches cleanly
 
 ## Checklist
 - [ ] Zero third-party dependencies added (`Package.swift` remains dependency-free)

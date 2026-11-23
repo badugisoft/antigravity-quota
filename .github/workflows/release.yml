@@ -74,7 +74,7 @@ jobs:
             VERSION="${GITHUB_REF_NAME#v}"
           fi
           echo "Packaging version: $VERSION"
-          ./scripts/package_release.sh "$VERSION"
+          make package VERSION="$VERSION"
 
       - name: Generate Release Notes from CHANGELOG.md
         run: |
@@ -83,7 +83,7 @@ jobs:
           else
             TAG="${GITHUB_REF_NAME}"
           fi
-          ./scripts/generate_release_notes.sh "$TAG" > "$RUNNER_TEMP/release_notes.md"
+          make release-notes VERSION="$TAG" > "$RUNNER_TEMP/release_notes.md"
           cat "$RUNNER_TEMP/release_notes.md"
 
       - name: Create GitHub Release

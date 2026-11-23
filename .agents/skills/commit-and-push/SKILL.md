@@ -13,8 +13,8 @@ Follow this checklist before committing and pushing any changes in **Antigravity
 - Run `git status -sb` and `git diff --stat` to verify only intended files are modified and no temporary files or unintended `assets/*.png` diffs exist.
 
 ## 2. Run Verification
-- Run `swift test` and confirm all tests pass.
-- If source code or bundle scripts changed, run `./scripts/build_app.sh` to verify Release compilation, inside-out codesigning, `/Applications` installation, and app launch.
+- Run `make test` and confirm all tests pass.
+- If source code or build configuration changed, run `make build` to verify Release compilation, inside-out codesigning, `/Applications` installation, and app launch.
 
 ## 3. Sync Changelog & Documentation
 - Update `CHANGELOG.md` under `## [Unreleased]` for any notable feature, fix, or workflow change.

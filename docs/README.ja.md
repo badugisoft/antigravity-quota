@@ -138,7 +138,7 @@ Antigravity はローカルの一時 TCP ポートで待機する内部言語サ
 
 ## macOS へのウィジェット追加手順
 
-1. DMG または `./scripts/build_app.sh` で **Antigravity Quota.app** を `/Applications` にインストールします。
+1. DMG または `make build` で **Antigravity Quota.app** を `/Applications` にインストールします。
 2. macOS のデスクトップを右クリックして **ウィジェットを編集...** を選択します（または **通知センター** を開いて下部の **ウィジェットを編集** をクリック）。
 3. ウィジェットギャラリーで **Antigravity Quota** を検索します。
 4. **小 (1x1)** または **中 (1x2)** ウィジェットを選び、デスクトップまたは通知センターへドラッグします。
@@ -172,7 +172,7 @@ Antigravity はローカルの一時 TCP ポートで待機する内部言語サ
 ```bash
 git clone https://github.com/badugisoft/antigravity-quota.git
 cd antigravity-quota
-./scripts/build_app.sh
+make build
 ```
 
 スクリプトは以下の処理を自動実行します：

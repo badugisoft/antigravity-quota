@@ -138,7 +138,7 @@ Antigravity 会在本地临时 TCP 端口上运行内部语言服务器守护进
 
 ## 在 macOS 上添加小组件
 
-1. 通过 DMG 或 `./scripts/build_app.sh` 将 **Antigravity Quota.app** 安装至 `/Applications`。
+1. 通过 DMG 或 `make build` 将 **Antigravity Quota.app** 安装至 `/Applications`。
 2. 在 macOS 桌面上右键点击并选择 **编辑小组件...**（或打开 **通知中心** 并点击底部的 **编辑小组件**）。
 3. 在小组件库中搜索 **Antigravity Quota**。
 4. 选择 **小号 (1x1)** 或 **中号 (1x2)** 小组件并拖放到桌面或通知中心即可。
@@ -172,7 +172,7 @@ Antigravity 会在本地临时 TCP 端口上运行内部语言服务器守护进
 ```bash
 git clone https://github.com/badugisoft/antigravity-quota.git
 cd antigravity-quota
-./scripts/build_app.sh
+make build
 ```
 
 该脚本将自动完成以下流程：

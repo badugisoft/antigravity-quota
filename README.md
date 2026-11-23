@@ -139,7 +139,7 @@ Antigravity runs an internal language server daemon (`language_server`) listenin
 
 ## Adding Widgets to macOS
 
-1. Install **Antigravity Quota.app** into `/Applications` (via DMG or `./scripts/build_app.sh`).
+1. Install **Antigravity Quota.app** into `/Applications` (via DMG or `make build`).
 2. Right-click on your macOS desktop and choose **Edit Widgets...** (or open **Notification Center** and click **Edit Widgets** at the bottom).
 3. Search for **Antigravity Quota** in the widget gallery.
 4. Choose either the **Small (1x1)** or **Medium (1x2)** widget and drag it onto your desktop or Notification Center.
@@ -173,7 +173,7 @@ Run the included automated build script from the repository root:
 ```bash
 git clone https://github.com/badugisoft/antigravity-quota.git
 cd antigravity-quota
-./scripts/build_app.sh
+make build
 ```
 
 The script will:
@@ -297,9 +297,11 @@ antigravity-quota/
 │   ├── widget_small.png                         # Small 1x1 macOS widget
 │   ├── widget_medium.png                        # Medium 1x2 macOS widget
 │   └── app_icon.png                             # 512x512 app icon
+├── Makefile                                     # Build, test, package, and release targets
 ├── scripts/
 │   ├── build_app.sh                             # App & WidgetKit extension build script
 │   ├── package_release.sh                       # Automated .dmg and .zip release packager
+│   ├── generate_release_notes.sh                # CHANGELOG.md release notes extractor
 │   └── entitlements/                            # macOS App Sandbox & group entitlements
 │       ├── app.entitlements                     # Host app entitlements
 │       └── widget.entitlements                  # Sandboxed widget extension entitlements

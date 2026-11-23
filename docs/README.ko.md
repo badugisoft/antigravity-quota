@@ -138,7 +138,7 @@ Antigravity는 임시 로컬 TCP 포트에서 대기하는 내부 언어 서버 
 
 ## macOS 위젯 추가 방법
 
-1. DMG 또는 `./scripts/build_app.sh`를 이용해 **Antigravity Quota.app**을 `/Applications`에 설치합니다.
+1. DMG 또는 `make build`를 이용해 **Antigravity Quota.app**을 `/Applications`에 설치합니다.
 2. macOS 데스크톱에서 우클릭 후 **위젯 편집...**을 선택합니다(또는 **알림 센터** 하단의 **위젯 편집** 클릭).
 3. 위젯 갤러리에서 **Antigravity Quota**를 검색합니다.
 4. **작은 크기(1x1)** 또는 **중간 크기(1x2)** 위젯을 선택해 데스크톱이나 알림 센터로 드래그합니다.
@@ -172,7 +172,7 @@ Antigravity는 임시 로컬 TCP 포트에서 대기하는 내부 언어 서버 
 ```bash
 git clone https://github.com/badugisoft/antigravity-quota.git
 cd antigravity-quota
-./scripts/build_app.sh
+make build
 ```
 
 이 스크립트는 다음 작업을 자동으로 수행합니다:

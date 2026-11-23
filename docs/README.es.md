@@ -138,7 +138,7 @@ Antigravity ejecuta un demonio interno de servidor de lenguaje (`language_server
 
 ## Añadir widgets a macOS
 
-1. Instala **Antigravity Quota.app** en `/Applications` (mediante el DMG o `./scripts/build_app.sh`).
+1. Instala **Antigravity Quota.app** en `/Applications` (mediante el DMG o `make build`).
 2. Haz clic derecho en el escritorio de macOS y selecciona **Editar widgets...** (o abre el **Centro de notificaciones** y pulsa **Editar widgets** abajo).
 3. Busca **Antigravity Quota** en la galería de widgets.
 4. Elige el widget **Pequeño (1x1)** o **Mediano (1x2)** y arrástralo al escritorio o al Centro de notificaciones.
@@ -172,7 +172,7 @@ Ejecuta el script de compilación automatizado desde la raíz del repositorio:
 ```bash
 git clone https://github.com/badugisoft/antigravity-quota.git
 cd antigravity-quota
-./scripts/build_app.sh
+make build
 ```
 
 El script realizará automáticamente los siguientes pasos:
